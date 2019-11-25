@@ -1,5 +1,5 @@
 #pragma once
-#include"Player.h"
+#include "ActCtrl.h"
 
 struct StatusCheck
 {

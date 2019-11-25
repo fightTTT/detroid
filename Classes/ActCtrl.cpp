@@ -18,7 +18,7 @@ ActCtrl::~ActCtrl()
 
 bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 {
-	if (str == "idle")
+	/*if (str == "idle")
 	{
 		_actionData.try_emplace(str, std::move(actModule));
 		_actionData[str].checkList.emplace_back(KeyCheck());
@@ -27,7 +27,7 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 		_actionData[str].actRun = MoveLR();
 
 		return true;
-	}
+	}*/
 
 	if (str == "moveDown")
 	{
@@ -85,19 +85,19 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 		if (CheckAct(data.second))
 		{
 			_actionData[data.first].actRun(sprite, data.second);
-			actFlag.emplace_back(data.second.actionType);
+			actList.emplace_back(data.second.actionType);
 		}
 		else
 		{
-			actFlag.remove(data.second.actionType);
+			actList.remove(data.second.actionType);
 		}
 	}
 
-	if (!actFlag.size())
+	if (!actList.size())
 	{
 
 	}
 
-	((Player&)sprite).SetActType(actFlag);
+	((Player&)sprite).SetActType(actList);
 
 }
