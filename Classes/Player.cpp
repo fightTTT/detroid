@@ -154,6 +154,7 @@ void Player::SetActType(std::list<PL_ACTION>& actTypeList)
 
 void Player::RunAnim(PL_ACTION animType)
 {
+
 	Animate* anim = Animate::create(AnimationCache::getInstance()->getAnimation(_animName[static_cast<int>(animType)]));
 	runAction(RepeatForever::create(anim));
 }

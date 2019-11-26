@@ -32,7 +32,7 @@ public:
 	void Update(cocos2d::Sprite& sprite);
 
 private:
-	std::list<PL_ACTION> actFlag;
+	std::list<PL_ACTION> actList;
 
 	std::map<std::string, ActModule> _actionData;			// アクションのリスト
 };
