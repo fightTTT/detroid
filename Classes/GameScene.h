@@ -31,6 +31,8 @@
 #include "input/TouchInput.h"
 #include "input/KeyInput.h"
 #include "Player.h"
+#include "effect/EffectMng.h"
+
 
 class GameScene : public cocos2d::Scene
 {
@@ -40,9 +42,16 @@ public:
 
     virtual bool init();
 
-	void update(float delta);
+	virtual void update(float delta)override;
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
+
+	//virtual void visit(cocos2d::Renderer *renderer, const cocos2d::Mat4& parentTransform, uint32_t parentFlags) override;
+	Player* player;
+
+	efk::EffectManager*		manager = nullptr;
+	efk::EffectEmitter*		emitter;
+	int count = 0;
 
     // implement the "static create()" method manually
     CREATE_FUNC(GameScene);

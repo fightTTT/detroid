@@ -6,12 +6,9 @@ bool BlackWhiteCheck::operator()(cocos2d::Sprite & sprite, ActModule & actModule
 
 	for (auto &black : actModule.blackList)
 	{
-		for (auto &actData : actType)
+		if (actType == black)
 		{
-			if (actData == black)
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 

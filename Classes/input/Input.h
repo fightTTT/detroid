@@ -23,7 +23,7 @@ enum class DIR
 
 struct Input
 {
-	virtual void Init(cocos2d::Node* node);
+	virtual void Init(cocos2d::Node* node) {};
 	virtual void Update() = 0;
 	bool GetDir(DIR dir) { return moveDir[static_cast<int>(dir)]; };
 	INPUT_TRG GetInput(DIR dir) { return inputTrg[static_cast<int>(dir)]; };

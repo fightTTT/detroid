@@ -22,6 +22,10 @@
  THE SOFTWARE.
  ****************************************************************************/
 #include<memory>
+#include <ck/ck.h>
+#include <ck/config.h>
+#include <ck/bank.h>
+#include <ck/Sound.h>
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
 
@@ -142,13 +146,28 @@ bool GameScene::init()
 	layer4->addChild(map);
 	this->addChild(layer4, 3);
 
+
+
 	auto layer3 = Layer::create();
 	layer3->setName("PlayerLayer");
-	auto player = new Player();
+	player = new Player();
 	layer3->addChild(Player::createSprite());
 
 	// ENUMクラスでレイヤーを管理する
 	this->addChild(layer3, 4);	
+
+	this->addChild(&player->GetEffect(),5);
+
+	this->scheduleUpdate();
+
+	manager = efk::EffectManager::create(cocos2d::Director::getInstance()->getVisibleSize());
+//#if CK_PLATFORM_ANDROID
+//	CkConfig config(env, activity);
+//#else
+//	CkConfig config;
+//#endif
+//
+//	CkInit(&config);
 	
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 	/*player = std::make_unique<Player>();*/
@@ -161,15 +180,21 @@ bool GameScene::init()
 
 void GameScene::update(float delta)
 {
+	//manager->update();
 }
 void GameScene::menuCloseCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application
     Director::getInstance()->end();
-
     /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
 
     //EventCustom customEndEvent("game_scene_close_event");
     //_eventDispatcher->dispatchEvent(&customEndEvent);
-
 }
+
+//void GameScene::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & parentTransform, uint32_t parentFlags)
+//{
+//	//manager->begin(renderer, _globalZOrder);
+//	cocos2d::Scene::visit(renderer, parentTransform, parentFlags);
+//	//manager->end(renderer, _globalZOrder);
+//}

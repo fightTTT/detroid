@@ -17,17 +17,13 @@ public:
 		return *s_Instance;
 	}
 
-	
-	
-
 	void AddAnim(PlayerAnimData& animData, std::string animName, PL_ACTION animType);
 
 	~AnimationMng();
 private:
 	AnimationMng();
+
 	static AnimationMng *s_Instance;
 
-	cocos2d::SpriteFrameCache* spriteCache;
-	cocos2d::FiniteTimeAction* playerAnim[static_cast<int>(PL_ACTION::MAX)];
+	//cocos2d::FiniteTimeAction* playerAnim[static_cast<int>(PL_ACTION::MAX)];
 };
-

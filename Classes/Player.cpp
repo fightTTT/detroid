@@ -6,6 +6,8 @@
 #else
 #include "input/TouchInput.h"
 #endif
+#include "effect/EffectMng.h"
+
 
 Sprite * Player::createSprite()
 {
@@ -28,13 +30,14 @@ Player::Player()
 	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]	   = { "playerData/jump.plist" ,"player-jump-" ,6 };
 	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)] = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
 	actCtrl = new ActCtrl();
+
 	Init();
 }
 
-
 Player::~Player()
 {
-
+	delete _input;
+	delete actCtrl;
 }
 
 void Player::Init()
@@ -95,6 +98,7 @@ void Player::Init()
 	actData.trgType = INPUT_TRG::ON;
 	actCtrl->AddAction(actData, "moveLeft");
 
+	actData.blackList.clear();
 	actData.actionType = PL_ACTION::RUN_SHOT;
 	actData.blackList.emplace_back(PL_ACTION::RUN);
 	actData.colOffSetPos = Vec2(22.5f, -55.5f);
@@ -104,6 +108,16 @@ void Player::Init()
 	actData.trgType = INPUT_TRG::ON;
 	actCtrl->AddAction(actData, "moveRight");
 
+	
+
+	_effect.try_emplace("aa", std::make_unique<EffectMng>());
+	_effect["aa"]->AddEffect("Laser01.efk");
+
+	layer = Layer::create();
+	layer->setName("effectLayer");
+	layer->addChild(_effect["aa"]->GetEfkEmitter());
+
+	_animNow = PL_ACTION::IDLE;
 	
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 	_input = new KeyInput;
@@ -116,7 +130,11 @@ void Player::Init()
 
 void Player::update(float delta)
 {
-	_animNow = PL_ACTION::IDLE;
+	/*CkBank* bank = CkBank::newBank("my_bank.ckb");
+	CkSound* sound = CkSound::newBankSound(bank, "my_sound");
+	sound->play();*/
+
+	_effect["aa"]->update();
 
 	//アニメーションの切り替え
 	auto animChange = [](Player* player)
@@ -128,33 +146,36 @@ void Player::update(float delta)
 		}
 	};
 
-	animChange(this);
-
 	actCtrl->Update(*this);
+	animChange(this);
 
 	_animOld = _animNow;
 
 	_input->Update();
 }
 
-INPUT_TRG Player::GetInputTrg(cocos2d::EventKeyboard::KeyCode keyCode)
+INPUT_TRG Player::GetInputTrg(EventKeyboard::KeyCode keyCode)
 {
 	return _input->GetInputType(keyCode);
 }
 
-const std::list<PL_ACTION>& Player::ActType()
+const PL_ACTION Player::ActType()
 {
-	return actFlag;
+	return _animNow;
 }
 
-void Player::SetActType(std::list<PL_ACTION>& actTypeList)
+void Player::SetActType(PL_ACTION actType)
 {
-	actFlag = actTypeList;
+	_animNow = actType;
+}
+
+cocos2d::Layer & Player::GetEffect()
+{
+	return *layer;
 }
 
 void Player::RunAnim(PL_ACTION animType)
 {
-
 	Animate* anim = Animate::create(AnimationCache::getInstance()->getAnimation(_animName[static_cast<int>(animType)]));
 	runAction(RepeatForever::create(anim));
 }

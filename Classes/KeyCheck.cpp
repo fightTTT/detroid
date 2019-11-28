@@ -7,7 +7,8 @@ bool KeyCheck::operator()(cocos2d::Sprite & sprite, ActModule & actModule)
 	{
 		return true;
 	}
-	else if (actModule.actionType == PL_ACTION::IDLE)
+	
+	if (actModule.actionType == PL_ACTION::IDLE)
 	{
 		return true;
 	}

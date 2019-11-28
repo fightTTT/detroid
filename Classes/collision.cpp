@@ -6,10 +6,10 @@
 USING_NS_CC;
 
 // 引数(当たり判定をしたいキャラの座標、キャラの画像のオフセット、キャラの向いている方向,当たり判定の数)
-bool MoveCol::operator()(cocos2d::Sprite & sprite, ActModule & actModule)
+bool MoveCol::operator()(Sprite & sprite, ActModule & actModule)
 {
 	auto mapLayer = Director::getInstance()->getRunningScene()->getChildByName("MapLayer");
-	auto mapData = (TMXTiledMap*)Director::getInstance()->getRunningScene()->getChildByName("MapLayer")->getChildByName("MapData");
+	auto mapData = (TMXTiledMap*)mapLayer->getChildByName("MapData");
 	TMXLayer *ground = mapData->getLayer("ground");
 
 	if (ground == nullptr)
@@ -45,9 +45,7 @@ bool MoveCol::operator()(cocos2d::Sprite & sprite, ActModule & actModule)
 		playerPos = Vec2((playerPos.x + actModule.speed.x) / 48.0f,( playerPos.y - actModule.speed.y) / 48.0f);
 		playerPos = Vec2(playerPos.x, ground->getLayerSize().height - playerPos.y);
 
-
 		// 画面範囲外制御
-
 		if (playerPos.x > 0 && playerPos.x < ground->getLayerSize().width
 			&& playerPos.y > 0 && playerPos.y < ground->getLayerSize().height)
 		{
@@ -61,8 +59,6 @@ bool MoveCol::operator()(cocos2d::Sprite & sprite, ActModule & actModule)
 		{
 			return false;
 		}
-
-		
 	}
 
 	return true;

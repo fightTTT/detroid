@@ -24,6 +24,7 @@
 
 #include "AppDelegate.h"
 #include "GameScene.h"
+#include "effect/Effekseer.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -39,6 +40,8 @@ using namespace cocos2d::experimental;
 #include "audio/include/SimpleAudioEngine.h"
 using namespace CocosDenshion;
 #endif
+
+
 
 USING_NS_CC;
 
@@ -122,6 +125,11 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	scene->setName("gameScene");
     // run
     director->runWithScene(scene);
+
+	//auto scene = HelloWorld::createScene();
+	//scene->setName("gameScene");
+	//// run
+	//director->runWithScene(scene);
 
     return true;
 }

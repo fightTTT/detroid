@@ -1,6 +1,7 @@
 #include "KeyInput.h"
 
-#define CHAR(keyCode)	 static_cast<char>(keyCode)
+#define KEYCODE(key)		EventKeyboard::KeyCode(key)
+#define CHAR(keyCode)		static_cast<char>(keyCode)
 
 USING_NS_CC;
 	
@@ -8,14 +9,14 @@ void KeyInput::Init(Node * node)
 {
 	for (int keyCode = 0; keyCode < static_cast<int>(EventKeyboard::KeyCode::KEY_PLAY); keyCode++)
 	{
-		inputType.try_emplace(CHAR(EventKeyboard::KeyCode(keyCode)), INPUT_TRG::OFF);
+		inputType.insert(std::make_pair(CHAR(KEYCODE(keyCode)), INPUT_TRG::OFF));
 	}
 	
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = [&](EventKeyboard::KeyCode keyCode, cocos2d::Event* event)->bool
 	{
 		
-		if (!nowInputType.try_emplace(CHAR(keyCode), 1).second)
+		if (!nowInputType.insert(std::make_pair(CHAR(keyCode), 1)).second)
 		{
 			nowInputType[CHAR(keyCode)] = 1;
 		}
@@ -45,10 +46,13 @@ void KeyInput::Init(Node * node)
 
 void KeyInput::Update()
 {
+	
 	for (auto trgType : nowInputType)
 	{
+		// oldKey‚ÆNowKey‚Ì“ü—Íó‘Ô‚ªˆá‚Á‚Ä‚¢‚½‚Æ‚«‚É’†‚É“ü‚é
 		if (oldInputType[trgType.first] != nowInputType[trgType.first])
 		{
+			// ‰Ÿ‚µ‚½uŠÔ,—£‚µ‚½uŠÔ‚Ìî•ñ‚ğ‰Ÿ‚µ‘±‚¯‚éA—£‚µ‘±‚¯‚é‚É•Ï‚¦‚é
 			if (inputType[CHAR(trgType.first)] == INPUT_TRG::ON_MOM)
 			{
 				inputType[CHAR(trgType.first)] = INPUT_TRG::ON;
@@ -63,8 +67,7 @@ void KeyInput::Update()
 			}
 		}
 
-		if (oldInputType.try_emplace(CHAR(cocos2d::EventKeyboard::KeyCode(trgType.first)),
-			nowInputType[trgType.first]).second)
+		if (oldInputType.insert(std::make_pair(CHAR(trgType.first),nowInputType[trgType.first])).second)
 		{
 			oldInputType[trgType.first] = nowInputType[trgType.first];
 		}

@@ -18,20 +18,20 @@ ActCtrl::~ActCtrl()
 
 bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 {
-	/*if (str == "idle")
+	if (str == "idle")
 	{
-		_actionData.try_emplace(str, std::move(actModule));
+		_actionData.insert(std::make_pair(str,actModule));
 		_actionData[str].checkList.emplace_back(KeyCheck());
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
 		_actionData[str].actRun = MoveLR();
 
 		return true;
-	}*/
+	}
 
 	if (str == "moveDown")
 	{
-		_actionData.try_emplace(str, std::move(actModule));
+		_actionData.insert(std::make_pair(str, actModule));
 		_actionData[str].checkList.emplace_back(KeyCheck());
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
@@ -42,7 +42,7 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 
 	if (str == "moveUp")
 	{
-		_actionData.try_emplace(str, std::move(actModule));
+		_actionData.insert(std::make_pair(str, actModule));
 		_actionData[str].checkList.emplace_back(KeyCheck());
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
@@ -53,7 +53,7 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 
 	if (str == "moveLeft" || str == "moveRight")
 	{
-		_actionData.try_emplace(str, std::move(actModule));
+		_actionData.insert(std::make_pair(str, actModule));
 		_actionData[str].checkList.emplace_back(KeyCheck());
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
@@ -80,24 +80,19 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 		return true;
 	};
 
+	bool idleFlag = true;
 	for (auto &data : _actionData)
 	{
 		if (CheckAct(data.second))
 		{
 			_actionData[data.first].actRun(sprite, data.second);
-			actList.emplace_back(data.second.actionType);
-		}
-		else
-		{
-			actList.remove(data.second.actionType);
+			((Player&)sprite).SetActType(data.second.actionType);
+			idleFlag = false;
 		}
 	}
 
-	if (!actList.size())
+	if (idleFlag)
 	{
-
+		((Player&)sprite).SetActType(PL_ACTION::IDLE);
 	}
-
-	((Player&)sprite).SetActType(actList);
-
 }
