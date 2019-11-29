@@ -16,7 +16,6 @@ bool HelloWorld::init()
 	}
 	
 	auto rsize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
-
 	auto sprite = Sprite::create("HelloWorld.png");
 	sprite->setPosition(Vec2(320, 200));
 	this->addChild(sprite, 0);

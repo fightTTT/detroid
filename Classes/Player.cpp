@@ -108,14 +108,23 @@ void Player::Init()
 	actData.trgType = INPUT_TRG::ON;
 	actCtrl->AddAction(actData, "moveRight");
 
-	
+	EffectStatus efkState;
+
+	efkState.efkFileName = "Simple_Distortion.efk";
+	efkState.pos = getPosition();
+	efkState.scale = 20;
 
 	_effect.try_emplace("aa", std::make_unique<EffectMng>());
-	_effect["aa"]->AddEffect("Laser01.efk");
+	_effect["aa"]->AddEffect(efkState);
 
 	layer = Layer::create();
 	layer->setName("effectLayer");
-	layer->addChild(_effect["aa"]->GetEfkEmitter());
+	_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
+	layer->addChild(&_effect["aa"]->GetEfkEmitter());
+
+	cocos2d::Director::getInstance()->getRunningScene()->addChild(layer, 5);
+	
+	//this->addChild(layer,5);
 
 	_animNow = PL_ACTION::IDLE;
 	
@@ -133,6 +142,20 @@ void Player::update(float delta)
 	/*CkBank* bank = CkBank::newBank("my_bank.ckb");
 	CkSound* sound = CkSound::newBankSound(bank, "my_sound");
 	sound->play();*/
+
+	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOM)
+	{
+		if (_effect["aa"]->GetEfkEmitter().getPlayOnEnter())
+		{
+			_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
+		}
+		else if(!_effect["aa"]->GetEfkEmitter().getPlayOnEnter())
+		{
+			_effect["aa"]->GetEfkEmitter().setPlayOnEnter(true);
+		}
+	}
+
+
 
 	_effect["aa"]->update();
 
@@ -159,7 +182,7 @@ INPUT_TRG Player::GetInputTrg(EventKeyboard::KeyCode keyCode)
 	return _input->GetInputType(keyCode);
 }
 
-const PL_ACTION Player::ActType()
+const PL_ACTION Player::GetActType()
 {
 	return _animNow;
 }

@@ -146,17 +146,18 @@ bool GameScene::init()
 	layer4->addChild(map);
 	this->addChild(layer4, 3);
 
-
-
 	auto layer3 = Layer::create();
 	layer3->setName("PlayerLayer");
 	player = new Player();
 	layer3->addChild(Player::createSprite());
 
-	// ENUMクラスでレイヤーを管理する
+	auto effectLayer = Layer::create();
+	layer3->setName("PlayerLayer");
+
+	// enumクラスでレイヤーを管理する
 	this->addChild(layer3, 4);	
 
-	this->addChild(&player->GetEffect(),5);
+	//this->addChild(&player->GetEffect(),5);
 
 	this->scheduleUpdate();
 
@@ -192,9 +193,9 @@ void GameScene::menuCloseCallback(Ref* pSender)
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 }
 
-//void GameScene::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & parentTransform, uint32_t parentFlags)
-//{
-//	//manager->begin(renderer, _globalZOrder);
-//	cocos2d::Scene::visit(renderer, parentTransform, parentFlags);
-//	//manager->end(renderer, _globalZOrder);
-//}
+void GameScene::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & parentTransform, uint32_t parentFlags)
+{
+	//manager->begin(renderer, _globalZOrder);
+	cocos2d::Scene::visit(renderer, parentTransform, parentFlags);
+	//manager->end(renderer, _globalZOrder);
+}

@@ -38,7 +38,7 @@ public:
 
 	// key‚ÌƒgƒŠƒK[î•ñ‚ğæ“¾‚·‚éŠÖ”
 	INPUT_TRG GetInputTrg(cocos2d::EventKeyboard::KeyCode keyCode);
-	const PL_ACTION ActType();
+	const PL_ACTION GetActType();
 	void SetActType(PL_ACTION actType);
 	cocos2d::Layer& GetEffect();
 private:
