@@ -12,7 +12,7 @@ enum class PL_ACTION
 {
 	IDLE,		// 立ち状態
 	RUN,		// 走る
-	JUMP,		// ジャンプ
+	JUMP_FALL,		// ジャンプ
 	RUN_SHOT,	// 走りながら弾発射
 	MAX
 };

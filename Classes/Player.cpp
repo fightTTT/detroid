@@ -27,7 +27,7 @@ Player::Player()
 {
 	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]	   = { "playerData/idle.plist" ,"player-idle-" ,4};
 	_playerAnimData[static_cast<int>(PL_ACTION::RUN)]	   = { "playerData/run.plist" ,"player-run-" ,10 };
-	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]	   = { "playerData/jump.plist" ,"player-jump-" ,6 };
+	_playerAnimData[static_cast<int>(PL_ACTION::JUMP_FALL)]	   = { "playerData/jump.plist" ,"player-jump-" ,6 };
 	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)] = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
 	actCtrl = new ActCtrl();
 
@@ -50,7 +50,7 @@ void Player::Init()
 
 	_animName[static_cast<int>(PL_ACTION::IDLE)]	 = "idle";
 	_animName[static_cast<int>(PL_ACTION::RUN)]		 = "run";
-	_animName[static_cast<int>(PL_ACTION::JUMP)]	 = "jump";
+	_animName[static_cast<int>(PL_ACTION::JUMP_FALL)]	 = "jump";
 	_animName[static_cast<int>(PL_ACTION::RUN_SHOT)] = "run-shot";
 
 	// アニメーションの登録
@@ -73,15 +73,15 @@ void Player::Init()
 	actData.speed = Vec2(0.0f, 0.0f);
 	//AddAction(actData, "idle");
 
-	actData.actionType = PL_ACTION::JUMP;
+	actData.actionType = PL_ACTION::JUMP_FALL;
 	actData.colOffSetPos = Vec2(-22.5f, -55.5f);
 	actData.colNum = 2;
 	actData.speed = Vec2(0.0f, 2.0f);
-	actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+	//actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 	actData.trgType = INPUT_TRG::ON;
 	actCtrl->AddAction(actData, "moveDown");
 
-	actData.actionType = PL_ACTION::JUMP;
+	actData.actionType = PL_ACTION::JUMP_FALL;
 	actData.colOffSetPos = Vec2(-22.5f, 55.5f);
 	actData.colNum = 2;
 	actData.speed = Vec2(0.0f, -2.0f);
@@ -90,6 +90,7 @@ void Player::Init()
 	actCtrl->AddAction(actData, "moveUp");
 
 	actData.actionType = PL_ACTION::RUN;
+	actData.blackList.emplace_back(PL_ACTION::JUMP_FALL);
 	actData.blackList.emplace_back(PL_ACTION::RUN_SHOT);
 	actData.colOffSetPos = Vec2(-22.5f, -55.5f);
 	actData.colNum = 3;
@@ -100,6 +101,7 @@ void Player::Init()
 
 	actData.blackList.clear();
 	actData.actionType = PL_ACTION::RUN_SHOT;
+	actData.blackList.emplace_back(PL_ACTION::JUMP_FALL);
 	actData.blackList.emplace_back(PL_ACTION::RUN);
 	actData.colOffSetPos = Vec2(22.5f, -55.5f);
 	actData.colNum = 3;
@@ -108,22 +110,11 @@ void Player::Init()
 	actData.trgType = INPUT_TRG::ON;
 	actCtrl->AddAction(actData, "moveRight");
 
-	EffectStatus efkState;
-
-	efkState.efkFileName = "Simple_Distortion.efk";
-	efkState.pos = getPosition();
-	efkState.scale = 20;
-
-	_effect.try_emplace("aa", std::make_unique<EffectMng>());
-	_effect["aa"]->AddEffect(efkState);
-
-	layer = Layer::create();
-	layer->setName("effectLayer");
-	_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
-	layer->addChild(&_effect["aa"]->GetEfkEmitter());
-
-	cocos2d::Director::getInstance()->getRunningScene()->addChild(layer, 5);
 	
+
+
+	
+
 	//this->addChild(layer,5);
 
 	_animNow = PL_ACTION::IDLE;
@@ -145,6 +136,16 @@ void Player::update(float delta)
 
 	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOM)
 	{
+		_effect.try_emplace("aa", std::make_unique<EffectMng>());
+		EffectStatus efkState;
+
+		efkState.efkFileName = "Simple_Distortion.efk";
+		efkState.pos = getPosition();
+		efkState.scale = 20;
+		_effect["aa"]->AddEffect(efkState);
+
+		_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
+
 		if (_effect["aa"]->GetEfkEmitter().getPlayOnEnter())
 		{
 			_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
@@ -155,9 +156,13 @@ void Player::update(float delta)
 		}
 	}
 
-
-
-	_effect["aa"]->update();
+	if (_effect.size())
+	{
+		for (auto &effect : _effect)
+		{
+			effect.second.get()->update();
+		}
+	}
 
 	//アニメーションの切り替え
 	auto animChange = [](Player* player)

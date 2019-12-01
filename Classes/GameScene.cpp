@@ -22,10 +22,10 @@
  THE SOFTWARE.
  ****************************************************************************/
 #include<memory>
-#include <ck/ck.h>
-#include <ck/config.h>
-#include <ck/bank.h>
-#include <ck/Sound.h>
+//#include <ck/ck.h>
+//#include <ck/config.h>
+//#include <ck/bank.h>
+//#include <ck/Sound.h>
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
 
@@ -151,11 +151,12 @@ bool GameScene::init()
 	player = new Player();
 	layer3->addChild(Player::createSprite());
 
-	auto effectLayer = Layer::create();
-	layer3->setName("PlayerLayer");
-
 	// enumクラスでレイヤーを管理する
 	this->addChild(layer3, 4);	
+
+	auto effectLayer = Layer::create();
+	effectLayer->setName("EffectLayer");
+	this->addChild(effectLayer, 5);
 
 	//this->addChild(&player->GetEffect(),5);
 

@@ -7,6 +7,7 @@ const int screen_height = 480;
 //Vector3 N;
 float  Nmag;
 float spacular;
+Vector3 eyeVec;
 
 //ヒントになると思って、色々と関数を用意しておりますが
 //別にこの関数を使わなければいけないわけでも、これに沿わなければいけないわけでも
@@ -43,6 +44,8 @@ bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,
 	// 三平方の定理を使って交点の座標を調べる
 	hitPos = eye + ray * ((shadowLength - sqrt(sp.radius * sp.radius - verticalLine.Magnitude()*verticalLine.Magnitude())));
 	
+	eyeVec = hitPos - eye;
+	eyeVec.Normalize();
 	// 法線を求める
 	normal = hitPos - sp.pos;
 	normal.Normalize();
@@ -52,15 +55,16 @@ bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,
 	// ライトの向きを決める
 	Vector3 Light = Vector3(-1,1, 1);
 
+	auto nvec = normal;
 
 	Nmag = Dot(Light, normal);
 	if (Nmag <= 0)
 	{
-		normal = sp.pos - hitPos;
-		normal.Normalize();
+		nvec = sp.pos - hitPos;
+		nvec.Normalize();
 	}
 
-	auto reflect = Light - normal * Nmag * 2;
+	auto reflect = Light - nvec * Nmag * 2;
 
 	reflect.Normalize();
 	auto notEyeVec = eye - hitPos;
@@ -81,10 +85,8 @@ bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,
 		distance = (shadowLength - (sqrt(sp.radius * sp.radius - verticalLine.Magnitude()*verticalLine.Magnitude())));
 		return true;
 	}
-	else
-	{
-		return true;
-	}
+	
+	return false;
 
 	//視線ベクトルとベクトル長をかけて、中心からの垂線下した点を求めます
 }
@@ -141,19 +143,19 @@ void DrawPlane(Vector3 eyePos,Vector3 ray,int screenPosX,int screenPosY)
 	}
 }
 
-int ReflectHitColor(Vector3 eyePos, Vector3 ray)
+float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 {
 	Plane plane;
 	plane.normal = Vector3(0, 1, 0);
 	plane.offSet = 100.0f;
 
-	auto vn = Dot(-ray, plane.normal);
+	auto vn = Dot(-reflectVec, plane.normal);
 	if (vn <= 0)
 	{
 		return 1;
 	}
 	auto hitPosLen = (plane.offSet - Dot(eyePos, plane.normal)) / vn;
-	auto hitPos = ray * hitPosLen + eyePos;
+	auto hitPos = reflectVec * hitPosLen + eyePos;
 	auto a = eyePos - hitPos;
 
 	if (Dot(a, plane.normal) > 0.0f)
@@ -206,15 +208,26 @@ void RayTracing(const Position3& eye,const Sphere& sphere)
 
 			if ((IsHitRayAndObject(eye,ray,sphere, distance,normal,hitPos)))
 			{
-				Vector3 reflectVec = ReflectedVector(eye, normal);
+				Vector3 reflectVec = ReflectedVector(eyeVec, normal);
+				reflectVec.Normalize();
 
 				float albedo[3] = { 0.4f , 0.7f, 1.0f };
 				float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
 				float color[3] = { diffuse[0] + spacular,diffuse[1] + spacular,diffuse[2] + spacular };
 
-				for (int i = 0; i < 3; i++)
+				if (normal.z > 0)
 				{
-					color[i] = Clamp(color[i]* ReflectHitColor(hitPos, reflectVec));
+					for (int i = 0; i < 3; i++)
+					{
+						color[i] = Clamp(color[i])*Clamp(ReflectHitColor(hitPos, reflectVec));
+					}
+				}
+				else
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						color[i] = Clamp(color[i]);
+					}
 				}
 
 				int b = 255;

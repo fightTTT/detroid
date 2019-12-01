@@ -19,7 +19,8 @@ bool EffectMng::init()
 
 void EffectMng::AddEffect(EffectStatus efkState)
 {
-	auto rsize = cocos2d::Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+	auto director = cocos2d::Director::getInstance();
+	auto rsize = director->getOpenGLView()->getDesignResolutionSize();
 
 	manager = efk::EffectManager::create(rsize);
 	auto effect = efk::Effect::create(efkState.efkFileName);
@@ -29,12 +30,12 @@ void EffectMng::AddEffect(EffectStatus efkState)
 	emitter->setPosition(efkState.pos);	
 	emitter->setScale(efkState.scale);
 	emitter->setEffect(effect);
-
+	director->getRunningScene()->getChildByName("EffectLayer")->addChild(emitter);
 }
 
 void EffectMng::update()
 {
-	emitter->setRemoveOnStop(false);
+	//emitter->setRemoveOnStop(false);
 	if (emitter->getPlayOnEnter())
 	{
 		emitter->setIsLooping(true);
