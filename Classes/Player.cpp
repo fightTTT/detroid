@@ -72,7 +72,7 @@ void Player::Init()
 	actData.speed = Vec2(0.0f, 0.0f);
 	//AddAction(actData, "idle");
 
-	actData.actionType = PL_ACTION::JUMP;
+	actData.actionType = PL_ACTION::IDLE;
 	actData.colOffSetPos = Vec2(-22.5f, -55.5f);
 	actData.colNum = 2;
 	actData.speed = Vec2(0.0f, 2.0f);

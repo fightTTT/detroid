@@ -10,6 +10,7 @@ float spacular;
 Vector3 eyeVec;
 constexpr int tileSize = 50;
 
+
 //ヒントになると思って、色々と関数を用意しておりますが
 //別にこの関数を使わなければいけないわけでも、これに沿わなければいけないわけでも
 //ありません。レイトレーシングができていれば構いません。
@@ -22,7 +23,6 @@ constexpr int tileSize = 50;
 bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,float& distance,Vector3& normal,Vector3& hitPos) 
 {
 	//レイが正規化済みである前提で…
-	//
 	//視点から球体中心へのベクトルを作ります
 	Vector3 center = sp.pos - eye;
 	//
@@ -102,20 +102,36 @@ Vector3 ReflectedVector(const Vector3& inVec, const Vector3& normalVec)
 }
 float PlaneColor(Vector3 hitPos)
 {
-	unsigned char color = 0x000000;
+	auto color1 = 0x6b3712;
+	auto color2 = 0x000000;
+	unsigned int color = color1;
 	if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
 		|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
 	{
-		color = 0xffffff;
+		color = color2;
 	}
 
 	if((int)hitPos.x <= 0)
 	{
-		color = ~color;
+		if (color == color1)
+		{
+			color = color2;
+		}
+		else
+		{
+			color = color1;
+		}
 	}
 	if ((int)hitPos.z <= 0)
 	{
-		color = ~color;
+		if (color == color1)
+		{
+			color = color2;
+		}
+		else
+		{
+			color = color1;
+		}
 	}
 		
 
@@ -180,13 +196,13 @@ float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 
 	if (Dot(-reflectVec, plane.normal) > 0.0f)
 	{
-		unsigned int color = 0x000000;
+		/*unsigned int color = 0x000000;
 
 		if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
 			|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
 		{
 			color = 0xffffff;
-		}
+		}*/
 
 		/*if ((int)hitPos.x <= 0)
 		{
@@ -198,7 +214,7 @@ float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 			color = ~color;
 		}*/
 			
-		return  PlaneColor(hitPos);
+		return (float)PlaneColor(hitPos);
 	}
 
 	return 1;
@@ -234,27 +250,20 @@ void RayTracing(const Position3& eye,const Sphere& sphere)
 				float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
 				float color[3] = { diffuse[0] + spacular,diffuse[1] + spacular,diffuse[2] + spacular };
 
-				if (normal.z > 0)
+				for (int i = 0; i < 3; i++)
 				{
-					for (int i = 0; i < 3; i++)
-					{
-						color[i] = Clamp(color[i])*Clamp(ReflectHitColor(hitPos, reflectVec));
-					}
+					color[i] = Clamp(color[i])/* * ReflectHitColor(hitPos, reflectVec)*/;
 				}
-				else
-				{
-					for (int i = 0; i < 3; i++)
-					{
-						color[i] = Clamp(color[i]);
-					}
-				}
-
+					
 				int b = 255;
-				float c = (400.f - distance) / 100.f;
+
+				auto hoge = GetColor(b * color[0], b * color[1], b * color[2]) * ReflectHitColor(hitPos, reflectVec);
+
+
+				/*float c = (400.f - distance) / 100.f;*/
 				
-				DrawPixel(x, y, GetColor(b * color[0], b * color[1], b * color[2]));
+				DrawPixel(x, y, hoge / 255.0f);
 			}
-			
 		}
 	}
 }

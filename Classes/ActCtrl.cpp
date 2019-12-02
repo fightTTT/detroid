@@ -88,6 +88,14 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 			_actionData[data.first].actRun(sprite, data.second);
 			((Player&)sprite).SetActType(data.second.actionType);
 			idleFlag = false;
+			if (data.second.keyCode == EventKeyboard::KeyCode::KEY_RIGHT_ARROW)
+			{
+				sprite.setFlippedX(false);
+			}
+			else if((data.second.keyCode == EventKeyboard::KeyCode::KEY_LEFT_ARROW))
+			{
+				sprite.setFlippedX(true);
+			}
 		}
 	}
 
