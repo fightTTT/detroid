@@ -6,13 +6,23 @@
 #include "Character.h"
 #include "input/Input.h"
 
-
-// プレイヤーアクションの種類
+// プレイヤーアニメーションの種類
 enum class PL_ACTION
 {
 	IDLE,		// 立ち状態
 	RUN,		// 走る
-	JUMP_FALL,		// ジャンプ
+	JUMP,		// ジャンプ
+	RUN_SHOT,	// 走りながら弾発射
+	MAX
+};
+
+// プレイヤーアクションの種類
+enum class PL_ACT
+{
+	IDLE,		// 立ち状態
+	RUN,		// 右移動
+	JUMP,		// ジャンプ
+	FALL,		// 落下
 	RUN_SHOT,	// 走りながら弾発射
 	MAX
 };
@@ -40,7 +50,6 @@ public:
 	INPUT_TRG GetInputTrg(cocos2d::EventKeyboard::KeyCode keyCode);
 	const PL_ACTION GetActType();
 	void SetActType(PL_ACTION actType);
-	cocos2d::Layer& GetEffect();
 private:
 	std::map<std::string, EffectData> _effect;
 
@@ -51,9 +60,7 @@ private:
 	std::string _animName[static_cast<int>(PL_ACTION::MAX)];
 	PlayerAnimData _playerAnimData[static_cast<int>(PL_ACTION::MAX)];
 
-	std::list<PL_ACTION> actFlag;
-
-	ActCtrl* actCtrl;
+	ActCtrl* _actCtrl;
 
 	PL_ACTION _animNow;					// 現在のアニメーション
 	PL_ACTION _animOld;					// 1フレーム前のアニメーション

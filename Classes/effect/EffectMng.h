@@ -18,7 +18,7 @@ public:
 	EffectMng();
 	~EffectMng();
 
-	void AddEffect(EffectStatus efkState);
+	void AddEffect(std::string layerName);
 	void update();
 //-------------------
 

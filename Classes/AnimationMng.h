@@ -17,7 +17,7 @@ public:
 		return *s_Instance;
 	}
 
-	void AddAnim(PlayerAnimData& animData, std::string animName, PL_ACTION animType);
+	void AddAnim(PlayerAnimData& animData, std::string animName);
 
 	~AnimationMng();
 private:

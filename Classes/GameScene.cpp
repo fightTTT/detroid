@@ -152,7 +152,7 @@ bool GameScene::init()
 	layer3->addChild(Player::createSprite());
 
 	// enumクラスでレイヤーを管理する
-	this->addChild(layer3, 4);	
+	this->addChild(layer3, 4);
 
 	auto effectLayer = Layer::create();
 	effectLayer->setName("EffectLayer");

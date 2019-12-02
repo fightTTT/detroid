@@ -8,6 +8,7 @@ const int screen_height = 480;
 float  Nmag;
 float spacular;
 Vector3 eyeVec;
+constexpr int tileSize = 50;
 
 //ヒントになると思って、色々と関数を用意しておりますが
 //別にこの関数を使わなければいけないわけでも、これに沿わなければいけないわけでも
@@ -99,36 +100,55 @@ Vector3 ReflectedVector(const Vector3& inVec, const Vector3& normalVec)
 {
 	return inVec - normalVec * Dot(inVec, normalVec) * 2;
 }
+float PlaneColor(Vector3 hitPos)
+{
+	unsigned char color = 0x000000;
+	if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
+		|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
+	{
+		color = 0xffffff;
+	}
 
+	if((int)hitPos.x <= 0)
+	{
+		color = ~color;
+	}
+	if ((int)hitPos.z <= 0)
+	{
+		color = ~color;
+	}
+		
+
+	return color;
+}
 
 void DrawPlane(Vector3 eyePos,Vector3 ray,int screenPosX,int screenPosY)
 {
 	Plane plane;
 	plane.normal = Vector3(0, 1, 0);
-	plane.offSet = 100.0f;
+	plane.offSet = -100.0f;
 
 	auto vn = Dot(-ray, plane.normal);
+
 	if (vn <= 0)
 	{
 		return;
 	}
-	auto hitPosLen = (plane.offSet - Dot(eyePos, plane.normal)) / vn;
+	auto hitPosLen = (Dot(eyePos, plane.normal) - plane.offSet) / vn;
 	auto hitPos = ray * hitPosLen + eyePos;
-	auto a = eyePos - hitPos;
 
-	
-	if (Dot(a,plane.normal) > 0.0f)
+	if (Dot(-ray,plane.normal) > 0.0f)
 	{
-		unsigned int color = 0x000000;
 
-		if ((int)hitPos.z / 10 % 2 && (int)hitPos.x / 10 % 2
-			|| (int)hitPos.z / 10 % 2 == 0 && (int)hitPos.x / 10 % 2 == 0)
+		/*if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
+			|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
 		{
-			// 11
 			color = 0xffffff;
-		}
+		}*/
 
-		if((int)hitPos.x <= 0)
+		//PlaneColor(hitPos);
+
+		/*if((int)hitPos.x <= 0)
 		{ 
 			color = ~color;
 		}
@@ -136,10 +156,10 @@ void DrawPlane(Vector3 eyePos,Vector3 ray,int screenPosX,int screenPosY)
 		if ((int)hitPos.z <= 0)
 		{
 			color = ~color;
-		}
+		}*/
 
 
-		DrawPixel(screenPosX, screenPosY, color);
+		DrawPixel(screenPosX, screenPosY, PlaneColor(hitPos));
 	}
 }
 
@@ -147,29 +167,28 @@ float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 {
 	Plane plane;
 	plane.normal = Vector3(0, 1, 0);
-	plane.offSet = 100.0f;
+	plane.offSet = -100.0f;
 
 	auto vn = Dot(-reflectVec, plane.normal);
+	// 床にあたってない時
 	if (vn <= 0)
 	{
 		return 1;
 	}
-	auto hitPosLen = (plane.offSet - Dot(eyePos, plane.normal)) / vn;
+	auto hitPosLen = (Dot(eyePos, plane.normal) - plane.offSet) / vn;
 	auto hitPos = reflectVec * hitPosLen + eyePos;
-	auto a = eyePos - hitPos;
 
-	if (Dot(a, plane.normal) > 0.0f)
+	if (Dot(-reflectVec, plane.normal) > 0.0f)
 	{
 		unsigned int color = 0x000000;
 
-		if ((int)hitPos.z / 10 % 2 && (int)hitPos.x / 10 % 2
-			|| (int)hitPos.z / 10 % 2 == 0 && (int)hitPos.x / 10 % 2 == 0)
+		if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
+			|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
 		{
-			// 11
 			color = 0xffffff;
 		}
 
-		if ((int)hitPos.x <= 0)
+		/*if ((int)hitPos.x <= 0)
 		{
 			color = ~color;
 		}
@@ -177,9 +196,9 @@ float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 		if ((int)hitPos.z <= 0)
 		{
 			color = ~color;
-		}
+		}*/
 			
-		return color;
+		return  PlaneColor(hitPos);
 	}
 
 	return 1;
@@ -249,7 +268,7 @@ int main()
 
 	DrawBox(0, 0, screen_width, screen_height, 0xAAC863,true);
 
-	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, -100)));
+	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, 100)));
 
 	WaitKey();
 	DxLib_End();

@@ -25,11 +25,11 @@ Sprite * Player::createSprite()
 
 Player::Player()
 {
-	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]	   = { "playerData/idle.plist" ,"player-idle-" ,4};
-	_playerAnimData[static_cast<int>(PL_ACTION::RUN)]	   = { "playerData/run.plist" ,"player-run-" ,10 };
-	_playerAnimData[static_cast<int>(PL_ACTION::JUMP_FALL)]	   = { "playerData/jump.plist" ,"player-jump-" ,6 };
-	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)] = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
-	actCtrl = new ActCtrl();
+	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]		= { "playerData/idle.plist" ,"player-idle-" ,4};
+	_playerAnimData[static_cast<int>(PL_ACTION::RUN)]		= { "playerData/run.plist" ,"player-run-" ,10 };
+	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]		= { "playerData/jump.plist" ,"player-jump-" ,6 };
+	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)]  = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
+	_actCtrl = new ActCtrl();
 
 	Init();
 }
@@ -37,7 +37,7 @@ Player::Player()
 Player::~Player()
 {
 	delete _input;
-	delete actCtrl;
+	delete _actCtrl;
 }
 
 void Player::Init()
@@ -50,13 +50,13 @@ void Player::Init()
 
 	_animName[static_cast<int>(PL_ACTION::IDLE)]	 = "idle";
 	_animName[static_cast<int>(PL_ACTION::RUN)]		 = "run";
-	_animName[static_cast<int>(PL_ACTION::JUMP_FALL)]	 = "jump";
+	_animName[static_cast<int>(PL_ACTION::JUMP)]	 = "jump";
 	_animName[static_cast<int>(PL_ACTION::RUN_SHOT)] = "run-shot";
 
 	// アニメーションの登録
 	for (int animType = 0; animType < static_cast<int>(PL_ACTION::MAX); animType++)
 	{
-		lpAnimationMng.AddAnim(_playerAnimData[animType], _animName[animType], PL_ACTION(animType));
+		lpAnimationMng.AddAnim(_playerAnimData[animType], _animName[animType]);
 	}
 
 	RunAnim(_animNow);
@@ -65,7 +65,6 @@ void Player::Init()
 	setPosition(Vec2(300 + origin.x, visibleSize.height / 2 + origin.y));
 	setScale(1.0);
 
-
 	ActModule actData;
 	actData.actionType = PL_ACTION::IDLE;
 	actData.colOffSetPos = Vec2(-22.5f, -55.5f);
@@ -73,49 +72,42 @@ void Player::Init()
 	actData.speed = Vec2(0.0f, 0.0f);
 	//AddAction(actData, "idle");
 
-	actData.actionType = PL_ACTION::JUMP_FALL;
+	actData.actionType = PL_ACTION::JUMP;
 	actData.colOffSetPos = Vec2(-22.5f, -55.5f);
 	actData.colNum = 2;
 	actData.speed = Vec2(0.0f, 2.0f);
 	//actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 	actData.trgType = INPUT_TRG::ON;
-	actCtrl->AddAction(actData, "moveDown");
+	_actCtrl->AddAction(actData, "moveDown");
 
-	actData.actionType = PL_ACTION::JUMP_FALL;
+	actData.actionType = PL_ACTION::JUMP;
 	actData.colOffSetPos = Vec2(-22.5f, 55.5f);
 	actData.colNum = 2;
 	actData.speed = Vec2(0.0f, -2.0f);
 	actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
 	actData.trgType = INPUT_TRG::ON;
-	actCtrl->AddAction(actData, "moveUp");
+	_actCtrl->AddAction(actData, "moveUp");
 
 	actData.actionType = PL_ACTION::RUN;
-	actData.blackList.emplace_back(PL_ACTION::JUMP_FALL);
+	actData.blackList.emplace_back(PL_ACTION::JUMP);
 	actData.blackList.emplace_back(PL_ACTION::RUN_SHOT);
 	actData.colOffSetPos = Vec2(-22.5f, -55.5f);
 	actData.colNum = 3;
 	actData.speed = Vec2(-3.0f, 0.0f);
 	actData.keyCode = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
 	actData.trgType = INPUT_TRG::ON;
-	actCtrl->AddAction(actData, "moveLeft");
+	_actCtrl->AddAction(actData, "moveLeft");
 
 	actData.blackList.clear();
 	actData.actionType = PL_ACTION::RUN_SHOT;
-	actData.blackList.emplace_back(PL_ACTION::JUMP_FALL);
+	actData.blackList.emplace_back(PL_ACTION::JUMP);
 	actData.blackList.emplace_back(PL_ACTION::RUN);
 	actData.colOffSetPos = Vec2(22.5f, -55.5f);
 	actData.colNum = 3;
 	actData.speed = Vec2(3.0f, 0.0f);
 	actData.keyCode = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
 	actData.trgType = INPUT_TRG::ON;
-	actCtrl->AddAction(actData, "moveRight");
-
-	
-
-
-	
-
-	//this->addChild(layer,5);
+	_actCtrl->AddAction(actData, "moveRight");
 
 	_animNow = PL_ACTION::IDLE;
 	
@@ -136,23 +128,23 @@ void Player::update(float delta)
 
 	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOM)
 	{
-		_effect.try_emplace("aa", std::make_unique<EffectMng>());
-		EffectStatus efkState;
+		_effect.try_emplace("test", std::make_unique<EffectMng>());
 
-		efkState.efkFileName = "Simple_Distortion.efk";
-		efkState.pos = getPosition();
-		efkState.scale = 20;
-		_effect["aa"]->AddEffect(efkState);
+		_effect["test"]->AddEffect("EffectLayer");
 
-		_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
+		auto effect = efk::Effect::create("Simple_Distortion.efk");
+		_effect["test"]->GetEfkEmitter().setPlayOnEnter(false);
+		_effect["test"]->GetEfkEmitter().setPosition(getPosition());
+		_effect["test"]->GetEfkEmitter().setScale(20);
+		_effect["test"]->GetEfkEmitter().setEffect(effect);
 
-		if (_effect["aa"]->GetEfkEmitter().getPlayOnEnter())
+		if (_effect["test"]->GetEfkEmitter().getPlayOnEnter())
 		{
-			_effect["aa"]->GetEfkEmitter().setPlayOnEnter(false);
+			_effect["test"]->GetEfkEmitter().setPlayOnEnter(false);
 		}
-		else if(!_effect["aa"]->GetEfkEmitter().getPlayOnEnter())
+		else if(!_effect["test"]->GetEfkEmitter().getPlayOnEnter())
 		{
-			_effect["aa"]->GetEfkEmitter().setPlayOnEnter(true);
+			_effect["test"]->GetEfkEmitter().setPlayOnEnter(true);
 		}
 	}
 
@@ -174,7 +166,8 @@ void Player::update(float delta)
 		}
 	};
 
-	actCtrl->Update(*this);
+	_actCtrl->Update(*this);
+
 	animChange(this);
 
 	_animOld = _animNow;
@@ -195,11 +188,6 @@ const PL_ACTION Player::GetActType()
 void Player::SetActType(PL_ACTION actType)
 {
 	_animNow = actType;
-}
-
-cocos2d::Layer & Player::GetEffect()
-{
-	return *layer;
 }
 
 void Player::RunAnim(PL_ACTION animType)

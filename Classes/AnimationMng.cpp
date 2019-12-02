@@ -14,9 +14,8 @@ AnimationMng::~AnimationMng()
 {
 }
 
-void AnimationMng::AddAnim(PlayerAnimData & animData, std::string animName, PL_ACTION animType)
+void AnimationMng::AddAnim(PlayerAnimData & animData, std::string animName)
 {
-	int animTypeInt = static_cast<int>(animType);
 	auto animCache = AnimationCache::getInstance();
 	SpriteFrameCache* spriteCache = SpriteFrameCache::getInstance();
 	

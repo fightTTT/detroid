@@ -17,20 +17,15 @@ bool EffectMng::init()
 	return false;
 }
 
-void EffectMng::AddEffect(EffectStatus efkState)
+void EffectMng::AddEffect(std::string layerName)
 {
 	auto director = cocos2d::Director::getInstance();
 	auto rsize = director->getOpenGLView()->getDesignResolutionSize();
 
 	manager = efk::EffectManager::create(rsize);
-	auto effect = efk::Effect::create(efkState.efkFileName);
 	emitter = efk::EffectEmitter::create(manager);
 	manager->setIsDistortionEnabled(true);
-	emitter->setPlayOnEnter(true);
-	emitter->setPosition(efkState.pos);	
-	emitter->setScale(efkState.scale);
-	emitter->setEffect(effect);
-	director->getRunningScene()->getChildByName("EffectLayer")->addChild(emitter);
+	director->getRunningScene()->getChildByName(layerName)->addChild(emitter);
 }
 
 void EffectMng::update()
