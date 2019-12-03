@@ -59,8 +59,6 @@ void Player::Init()
 		lpAnimationMng.AddAnim(_playerAnimData[animType], _animName[animType]);
 	}
 
-	
-
 	// ‰ŠúÀ•W‚Æ‘å‚«‚³‚Ìİ’è
 	setPosition(Vec2(300 + origin.x, visibleSize.height / 2 + origin.y + 150));
 	setScale(1.0);

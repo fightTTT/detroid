@@ -79,6 +79,19 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 		return true;
 	};
 
+	auto CheckFlip = [&](EventKeyboard::KeyCode keyCode)
+	{
+		if (keyCode == EventKeyboard::KeyCode::KEY_RIGHT_ARROW)
+		{
+			return false;
+		}
+		else if (keyCode == EventKeyboard::KeyCode::KEY_LEFT_ARROW)
+		{
+			return true;
+		}
+		return sprite.isFlippedX();
+	};
+
 	bool idleFlag = true;
 	for (auto &data : _actionData)
 	{
@@ -87,14 +100,7 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 			_actionData[data.first].actRun(sprite, data.second);
 			((Player&)sprite).SetActType(data.second.actionType);
 			idleFlag = false;
-			if (data.second.keyCode == EventKeyboard::KeyCode::KEY_RIGHT_ARROW)
-			{
-				sprite.setFlippedX(false);
-			}
-			else if((data.second.keyCode == EventKeyboard::KeyCode::KEY_LEFT_ARROW))
-			{
-				sprite.setFlippedX(true);
-			}
+			sprite.setFlippedX(CheckFlip(data.second.keyCode));
 		}
 	}
 
@@ -103,3 +109,4 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 		((Player&)sprite).SetActType(PL_ACTION::IDLE);
 	}
 }
+

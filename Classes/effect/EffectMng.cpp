@@ -18,8 +18,7 @@ EffectMng::~EffectMng()
 }
 
 bool EffectMng::Init()
-{
-	
+{	
 	emitter = efk::EffectEmitter::create(manager);
 	
 	return false;
@@ -58,7 +57,7 @@ void EffectMng::PlayEffect(std::string effectName, bool playEffect)
 
 efk::EffectEmitter* EffectMng::AddLayer(std::string layerName, std::string effectName)
 {
-	auto director = cocos2d::Director::getInstance();
+	//auto director = cocos2d::Director::getInstance();
 	manager->setIsDistortionEnabled(true);
 	//director->getRunningScene()->getChildByName(layerName)->addChild(effectData[effectName]);
 

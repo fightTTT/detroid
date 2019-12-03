@@ -149,10 +149,10 @@ bool GameScene::init()
 	auto map = TMXTiledMap::create("untitled.tmx");
 	map->setPosition(0,0);
 	map->setName("MapData");
-	auto groundLayer = map->getLayer("ground");
-	groundLayer->setGlobalZOrder(0);
-	auto subGroundLayer = map->getLayer("subGround");
-	subGroundLayer->setGlobalZOrder(5);
+	//auto groundLayer = map->getLayer("ground");
+	//groundLayer->setGlobalZOrder(0);
+	//auto subGroundLayer = map->getLayer("subGround");
+	//subGroundLayer->setGlobalZOrder(5);
 	mapLayer->addChild(map);
 	this->addChild(mapLayer, 3);
 
