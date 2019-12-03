@@ -105,6 +105,11 @@ Vector3::operator*=(float scale) {
 	z *= scale;
 }
 
+bool Vector3::operator==(const Vector3 & vec) const
+{
+	return ((x == vec.x) && (y == vec.y) && (z == vec.z));
+}
+
 Vector3
 Vector3::operator*(float scale)const {
 	return Vector3(x*scale, y*scale,z*scale);
@@ -142,6 +147,15 @@ Vector3::Normalized() {
 	return Vector3(x / mag, y / mag,z/mag);
 }
 
+
+Vector3 operator+(const Vector3 & u, const float & v)
+{
+	Vector3 vec;
+	vec.x = u.x + v;
+	vec.y = u.y + v;
+
+	return vec;
+}
 
 ///ì‡êœÇï‘Ç∑
 float

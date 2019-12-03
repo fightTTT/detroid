@@ -52,7 +52,6 @@ float Clamp(float num);
 //Positionのほうがよくね？って理由でこの名前
 typedef Vector2 Position2;
 
-
 //3D座標・ベクトルを表す構造体
 struct Vector3 {
 	Vector3() :x(0), y(0) ,z(0){}
@@ -70,6 +69,9 @@ struct Vector3 {
 	void operator+=(const Vector3& v);
 	void operator-=(const Vector3& v);
 	void operator*=(float scale);
+
+	bool operator==(const Vector3& vec) const;
+
 	Vector3 operator*(float scale)const;
 	Vector3 operator-(float mag)const;
 	Vector3 operator-() {
@@ -79,6 +81,8 @@ struct Vector3 {
 Vector3 operator+(const Vector3& va, const Vector3 vb);
 Vector3 operator-(const Vector3& va, const Vector3 vb);
 
+
+Vector3 operator+(const Vector3 &u, const float &v);
 ///内積を返す
 float Dot(const Vector3& va, const Vector3& vb);
 
@@ -91,7 +95,7 @@ float operator*(const Vector3& va, const Vector3& vb);
 ///外積演算子
 Vector3 operator%(const Vector3& va, const Vector3& vb);
 typedef Vector3 Position3;
-
+typedef Vector3 Color;
 ///円を表す構造体
 struct Circle {
 	float radius;//半径
@@ -143,4 +147,5 @@ struct Plane
 	Vector3 normal;		// 法線ベクトル
 	float offSet;		// 原点からのオフセット
 };
+
 

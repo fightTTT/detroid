@@ -76,7 +76,6 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 				return false;
 			}
 		}
-
 		return true;
 	};
 

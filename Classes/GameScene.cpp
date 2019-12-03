@@ -28,7 +28,7 @@
 //#include <ck/Sound.h>
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
-
+#include "effect/EffectMng.h"
 
 USING_NS_CC;
 
@@ -124,45 +124,53 @@ bool GameScene::init()
         //this->addChild(sprite, 0);
     }
 
-	auto layer = Layer::create();
-	layer->setName("BGLayer");
+	auto bgLayer = Layer::create();
+	auto mdlLayer = Layer::create();
+	auto playerLayer = Layer::create();
+	auto mapLayer = Layer::create();
+	auto effectLayer = Layer::create();
+
+	bgLayer->setName("BGLayer");
+	mdlLayer->setName("MDLLayer");
+	playerLayer->setName("PlayerLayer");
+	mapLayer->setName("MapLayer");
+	effectLayer->setName("EffectLayer");
+
 	auto bg_ground = Sprite::create("image/Environment/background.png");
 	bg_ground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	layer->addChild(bg_ground);
-	this->addChild(layer);
+	bgLayer->addChild(bg_ground);
+	this->addChild(bgLayer);
 
-	auto layer2 = Layer::create();
-	layer2->setName("MDLLayer");
 	auto mdl_ground = Sprite::create("image/Environment/middleground-no-fungus.png");
 	mdl_ground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	layer2->addChild(mdl_ground);
-	this->addChild(layer2,1);
+	mdlLayer->addChild(mdl_ground);
+	this->addChild(mdlLayer,1);
 
-	auto layer4 = Layer::create();
-	layer4->setName("MapLayer");
 	auto map = TMXTiledMap::create("untitled.tmx");
 	map->setPosition(0,0);
 	map->setName("MapData");
-	layer4->addChild(map);
-	this->addChild(layer4, 3);
+	auto groundLayer = map->getLayer("ground");
+	groundLayer->setGlobalZOrder(0);
+	auto subGroundLayer = map->getLayer("subGround");
+	subGroundLayer->setGlobalZOrder(5);
+	mapLayer->addChild(map);
+	this->addChild(mapLayer, 3);
 
-	auto layer3 = Layer::create();
-	layer3->setName("PlayerLayer");
 	player = new Player();
-	layer3->addChild(Player::createSprite());
+	playerLayer->addChild(Player::createSprite());
+	this->addChild(playerLayer, 4);
 
-	// enumクラスでレイヤーを管理する
-	this->addChild(layer3, 4);
+	lpEffectMng.Create("circle", "Laser01.efk");
+	lpEffectMng.Scale("circle", 20);
+	lpEffectMng.PlayEffect("circle", false);
+	lpEffectMng.AddLayer("EffectLayer", "circle")->setName("circleEffect");
+	effectLayer->addChild(lpEffectMng.AddLayer("EffectLayer", "circle"));
 
-	auto effectLayer = Layer::create();
-	effectLayer->setName("EffectLayer");
-	this->addChild(effectLayer, 5);
+	this->addChild(effectLayer, 6);
 
 	//this->addChild(&player->GetEffect(),5);
 
 	this->scheduleUpdate();
-
-	manager = efk::EffectManager::create(cocos2d::Director::getInstance()->getVisibleSize());
 //#if CK_PLATFORM_ANDROID
 //	CkConfig config(env, activity);
 //#else
@@ -171,18 +179,11 @@ bool GameScene::init()
 //
 //	CkInit(&config);
 	
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-	/*player = std::make_unique<Player>();*/
-#else
-	//player.reset(new Player());
-#endif
-	
-    return true;
+	return true;
 }
 
 void GameScene::update(float delta)
 {
-	//manager->update();
 }
 void GameScene::menuCloseCallback(Ref* pSender)
 {

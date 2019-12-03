@@ -9,6 +9,7 @@ float  Nmag;
 float spacular;
 Vector3 eyeVec;
 constexpr int tileSize = 50;
+Vector3	light(-1, 1, 1);;
 
 
 //ヒントになると思って、色々と関数を用意しておりますが
@@ -54,18 +55,18 @@ bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,
 	//Light = Light - p;
 	//Light.Normalize();
 	// ライトの向きを決める
-	Vector3 Light = Vector3(-1,1, 1);
+
 
 	auto nvec = normal;
 
-	Nmag = Dot(Light, normal);
+	Nmag = Dot(light, normal);
 	if (Nmag <= 0)
 	{
 		nvec = sp.pos - hitPos;
 		nvec.Normalize();
 	}
 
-	auto reflect = Light - nvec * Nmag * 2;
+	auto reflect = light - nvec * Nmag * 2;
 
 	reflect.Normalize();
 	auto notEyeVec = eye - hitPos;
@@ -100,11 +101,12 @@ Vector3 ReflectedVector(const Vector3& inVec, const Vector3& normalVec)
 {
 	return inVec - normalVec * Dot(inVec, normalVec) * 2;
 }
-float PlaneColor(Vector3 hitPos)
+Color PlaneColor(Vector3 hitPos)
 {
-	auto color1 = 0x6b3712;
-	auto color2 = 0x000000;
-	unsigned int color = color1;
+	Color color1 = {0.4,0.8,0.6};
+
+	Color color2 = {0.7,0.3,0.5 };
+	Color color = color1;
 	if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
 		|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
 	{
@@ -133,12 +135,11 @@ float PlaneColor(Vector3 hitPos)
 			color = color1;
 		}
 	}
-		
-
+	
 	return color;
 }
 
-void DrawPlane(Vector3 eyePos,Vector3 ray,int screenPosX,int screenPosY)
+Color DrawPlane(Vector3 eyePos,Vector3 ray,bool& isHit,Position3& hitPos)
 {
 	Plane plane;
 	plane.normal = Vector3(0, 1, 0);
@@ -148,38 +149,22 @@ void DrawPlane(Vector3 eyePos,Vector3 ray,int screenPosX,int screenPosY)
 
 	if (vn <= 0)
 	{
-		return;
+		isHit = false;
+		return{ 0,0,0 };
 	}
 	auto hitPosLen = (Dot(eyePos, plane.normal) - plane.offSet) / vn;
-	auto hitPos = ray * hitPosLen + eyePos;
+	hitPos = ray * hitPosLen + eyePos;
 
 	if (Dot(-ray,plane.normal) > 0.0f)
 	{
-
-		/*if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
-			|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
-		{
-			color = 0xffffff;
-		}*/
-
-		//PlaneColor(hitPos);
-
-		/*if((int)hitPos.x <= 0)
-		{ 
-			color = ~color;
-		}
-
-		if ((int)hitPos.z <= 0)
-		{
-			color = ~color;
-		}*/
-
-
-		DrawPixel(screenPosX, screenPosY, PlaneColor(hitPos));
+		isHit = true;
+		return PlaneColor(hitPos);
 	}
+	isHit = false;
+	return {1,1,1};
 }
 
-float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
+Color ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 {
 	Plane plane;
 	plane.normal = Vector3(0, 1, 0);
@@ -189,35 +174,36 @@ float ReflectHitColor(Vector3 eyePos, Vector3 reflectVec)
 	// 床にあたってない時
 	if (vn <= 0)
 	{
-		return 1;
+		return { 1,1,1 };
 	}
 	auto hitPosLen = (Dot(eyePos, plane.normal) - plane.offSet) / vn;
 	auto hitPos = reflectVec * hitPosLen + eyePos;
 
 	if (Dot(-reflectVec, plane.normal) > 0.0f)
-	{
-		/*unsigned int color = 0x000000;
-
-		if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
-			|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
-		{
-			color = 0xffffff;
-		}*/
-
-		/*if ((int)hitPos.x <= 0)
-		{
-			color = ~color;
-		}
-
-		if ((int)hitPos.z <= 0)
-		{
-			color = ~color;
-		}*/
-			
-		return (float)PlaneColor(hitPos);
+	{			
+		return PlaneColor(hitPos);
 	}
 
-	return 1;
+	return { 1,1,1 };
+}
+bool DrawShadow(const Sphere& sp,const Position3& PlanePos, const Vector3& light)
+{
+	Vector3 center = sp.pos - PlanePos;
+	
+	Vector3 ray = light * -1;
+	ray.Normalize();
+	float shadowLength = Dot(ray, center);
+
+	Vector3 shadowRay = ray * shadowLength;
+	Vector3 verticalLine = center - shadowRay;
+
+
+	if (verticalLine.Magnitude() > sp.radius)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 ///レイトレーシング
@@ -232,37 +218,58 @@ void RayTracing(const Position3& eye,const Sphere& sphere)
 			//②正規化しとく
 			ray.Normalize();
 			float distance = 0;
+			bool DrawPlaneFlag = false;
+			Position3 PlanePos = { 0,0,0 };
 
-			DrawPlane(eye, ray, x, y);
-	
+			auto plane = DrawPlane(eye, ray, DrawPlaneFlag, PlanePos);
+
+			if (DrawShadow(sphere, PlanePos, light))
+			{
+				plane.x = plane.x + (-0.3);
+				plane.y = plane.y + (-0.3);
+				plane.z = plane.z + (-0.3);
+
+			}
+			plane *= 255;
+			
+			if (DrawPlaneFlag)
+			{
+				DrawPixel(x, y, GetColor(plane.x, plane.y, plane.z));
+			}
+
+			
 			//③IsHitRay関数がTrueだったら白く塗りつぶす
 			//※塗りつぶしはDrawPixelという関数を使う。
 
+			
+
 			Vector3 normal = { 0,0,0 };
-			Vector3 hitPos = { 0,0,0 };
+			Position3 hitPos = { 0,0,0 };
 
 			if ((IsHitRayAndObject(eye,ray,sphere, distance,normal,hitPos)))
 			{
 				Vector3 reflectVec = ReflectedVector(eyeVec, normal);
 				reflectVec.Normalize();
 
-				float albedo[3] = { 0.4f , 0.7f, 1.0f };
+				float albedo[3] = { 0.5f , 0.8f, 0.8f };
 				float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
-				float color[3] = { diffuse[0] + spacular,diffuse[1] + spacular,diffuse[2] + spacular };
+				float color[3] = { diffuse[0] + spacular + 0.1f,diffuse[1] + spacular + 0.1f,diffuse[2] + spacular + 0.1f };
 
 				for (int i = 0; i < 3; i++)
 				{
-					color[i] = Clamp(color[i])/* * ReflectHitColor(hitPos, reflectVec)*/;
+					color[i] = Clamp(color[i]);
 				}
 					
 				int b = 255;
 
-				auto hoge = GetColor(b * color[0], b * color[1], b * color[2]) * ReflectHitColor(hitPos, reflectVec);
+				auto hoge = GetColor(b * color[0]* ReflectHitColor(hitPos, reflectVec).x,
+							b * color[1]* ReflectHitColor(hitPos, reflectVec).y,
+							b * color[2] * ReflectHitColor(hitPos, reflectVec).z);
 
 
 				/*float c = (400.f - distance) / 100.f;*/
 				
-				DrawPixel(x, y, hoge / 255.0f);
+				DrawPixel(x, y, hoge);
 			}
 		}
 	}
@@ -277,8 +284,25 @@ int main()
 
 	DrawBox(0, 0, screen_width, screen_height, 0xAAC863,true);
 
-	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, 100)));
+	float x = 0;
+
+	//if (CheckHitKey(KEY_INPUT_RIGHT))
+	//{
+	//	x += 3.0f;
+	//}
+	//else if (CheckHitKey(KEY_INPUT_LEFT))
+	//{
+	//	x -= 3.0f;
+	//}
+
+	//while (!CheckHitKey(KEY_INPUT_ESCAPE))
+	//{
+	//
+	//}
+	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(x, 0, 100)));
+
 
 	WaitKey();
+	
 	DxLib_End();
 }

@@ -33,12 +33,13 @@ class EffectMng;
 // アニメーションデータ　		 <plist,画像名,フレーム数 >
 using PlayerAnimData = std::tuple<std::string, std::string, int>;
 
-using EffectData = std::unique_ptr<EffectMng>;
+//using EffectData = std::unique_ptr<EffectMng>;
 
 class Player :
 	public Sprite
 {
 public:
+
 	// プレイヤークラスを生成する
 	static Sprite *createSprite();
 	Player();
@@ -51,7 +52,7 @@ public:
 	const PL_ACTION GetActType();
 	void SetActType(PL_ACTION actType);
 private:
-	std::map<std::string, EffectData> _effect;
+	/*std::map<std::string, EffectData> _effect;*/
 
 	Input* _input;
 
