@@ -3,12 +3,14 @@
 
 bool KeyCheck::operator()(cocos2d::Sprite & sprite, ActModule & actModule)
 {
-	if (((Player&)sprite).GetInputTrg(actModule.keyCode) == actModule.trgType)
+	if (actModule.actionType == PL_ACTION::IDLE
+	 || actModule.actionType == PL_ACTION::FALL
+	 || actModule.actionType == PL_ACTION::JUMP)
 	{
 		return true;
 	}
-	
-	if (actModule.actionType == PL_ACTION::IDLE)
+
+	if (((Player&)sprite).GetInputTrg(actModule.keyCode) == actModule.trgType)
 	{
 		return true;
 	}

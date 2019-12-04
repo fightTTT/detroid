@@ -1,13 +1,16 @@
 #include "TouchInput.h"
-
+#include "ActCtrl.h"
 
 void TouchInput::Init(cocos2d::Node * node)
 {
+	ActCtrl* act;
 	auto touch = cocos2d::EventListenerTouchOneByOne::create();
 	touch->onTouchBegan = CC_CALLBACK_2(TouchInput::OnTouch, this);
 	touch->onTouchMoved = CC_CALLBACK_2(TouchInput::KeepTouch, this);
 	touch->onTouchEnded = CC_CALLBACK_2(TouchInput::OffTouch, this);
 	node->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touch, node);
+
+	//inputType.insert(std::make_pair(act->GetActKeyCode("move")), INPUT_TRG::OFF));
 }
 
 void TouchInput::Update()
@@ -15,14 +18,10 @@ void TouchInput::Update()
 	
 }
 
-
 bool TouchInput::OnTouch(cocos2d::Touch * touch, cocos2d::Event * event)
 {
-	
 	startPos = touch->getStartLocation();
 
-	//event->stopPropagation();
-	
 	return true;
 }
 
@@ -54,9 +53,6 @@ void TouchInput::KeepTouch(cocos2d::Touch * touch, cocos2d::Event * event)
 		moveDir[static_cast<int>(DIR::LEFT)] = true;
 		moveDir[static_cast<int>(DIR::RIGHT)] = false;
 	}
-	
-
-
 }
 
 void TouchInput::OffTouch(cocos2d::Touch * touch, cocos2d::Event * event)
@@ -68,5 +64,4 @@ void TouchInput::OffTouch(cocos2d::Touch * touch, cocos2d::Event * event)
 			dir = false;
 		}
 	}
-
 }

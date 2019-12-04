@@ -42,16 +42,20 @@ void Player::Init()
 
 	_animNow = PL_ACTION::IDLE;
 	_animOld = _animNow;
+	// アニメーション情報の登録
+	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]	    = { "playerData/idle.plist" ,"player-idle-" ,4 };
+	_playerAnimData[static_cast<int>(PL_ACTION::FALL)]	    = { "playerData/idle.plist" ,"player-idle-" ,4 };
+	_playerAnimData[static_cast<int>(PL_ACTION::RIGHT_MOVE)]= { "playerData/run.plist" ,"player-run-" ,10 };
+	_playerAnimData[static_cast<int>(PL_ACTION::LEFT_MOVE)] = { "playerData/run.plist" ,"player-run-" ,10 };
+	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]	    = { "playerData/jump.plist" ,"player-jump-" ,6 };
+	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)]  = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
 
-	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]	   = { "playerData/idle.plist" ,"player-idle-" ,4 };
-	_playerAnimData[static_cast<int>(PL_ACTION::RUN)]	   = { "playerData/run.plist" ,"player-run-" ,10 };
-	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]	   = { "playerData/jump.plist" ,"player-jump-" ,6 };
-	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)] = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
-
-	_animName[static_cast<int>(PL_ACTION::IDLE)]	 = "idle";
-	_animName[static_cast<int>(PL_ACTION::RUN)]		 = "run";
-	_animName[static_cast<int>(PL_ACTION::JUMP)]	 = "jump";
-	_animName[static_cast<int>(PL_ACTION::RUN_SHOT)] = "run-shot";
+	_animName[static_cast<int>(PL_ACTION::IDLE)]		= "idle";
+	_animName[static_cast<int>(PL_ACTION::FALL)]		= "idle";
+	_animName[static_cast<int>(PL_ACTION::RIGHT_MOVE)]	= "run";
+	_animName[static_cast<int>(PL_ACTION::LEFT_MOVE)]	= "run";
+	_animName[static_cast<int>(PL_ACTION::JUMP)]		= "jump";
+	_animName[static_cast<int>(PL_ACTION::RUN_SHOT)]	= "run-shot";
 
 	// アニメーションの登録
 	for (int animType = 0; animType < static_cast<int>(PL_ACTION::MAX); animType++)
@@ -63,46 +67,31 @@ void Player::Init()
 	setPosition(Vec2(300 + origin.x, visibleSize.height / 2 + origin.y + 150));
 	setScale(1.0);
 
+	Vec2 colSize = { 25.0f, 70.0f };	// 当たり判定の半分のサイズ
 
-	ActModule actData;
+	_JumpSpeed = 10.0f;
+	
 	// ノーマル(立ち状態)
 	{
-		
+		ActModule actData;
 		actData.actionType = PL_ACTION::IDLE;
-		actData.colOffSetPos = Vec2(-22.5f, -55.5f);
-		actData.colNum = 2;
+		actData.blackList.emplace_back(PL_ACTION::JUMP);
+		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
+		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
+		actData.blackList.emplace_back(PL_ACTION::RUN_SHOT);
+		actData.blackList.emplace_back(PL_ACTION::FALL);
+		actData.colNum = 0;
 		actData.speed = Vec2(0.0f, 0.0f);
 		_actCtrl->AddAction(actData, "idle");
 	}
 
-	// 落下
-	{
-		actData.actionType = PL_ACTION::IDLE;
-		actData.colOffSetPos = Vec2(-22.5f, -55.5f);
-		actData.colNum = 2;
-		actData.speed = Vec2(0.0f, 2.0f);
-		//actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
-		actData.trgType = INPUT_TRG::ON;
-		_actCtrl->AddAction(actData, "moveDown");
-	}
-
-	// ジャンプ
-	{
-		actData.actionType = PL_ACTION::JUMP;
-		actData.colOffSetPos = Vec2(-22.5f, 55.5f);
-		actData.colNum = 2;
-		actData.speed = Vec2(0.0f, -2.0f);
-		actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
-		actData.trgType = INPUT_TRG::ON;
-		_actCtrl->AddAction(actData, "moveUp");
-	}
-
 	// 左移動
 	{
-		actData.actionType = PL_ACTION::RUN;
-		actData.blackList.emplace_back(PL_ACTION::JUMP);
-		actData.blackList.emplace_back(PL_ACTION::RUN_SHOT);
-		actData.colOffSetPos = Vec2(-22.5f, -55.5f);
+		ActModule actData;
+		actData.actionType = PL_ACTION::RIGHT_MOVE;
+		//actData.blackList.emplace_back(PL_ACTION::JUMP);
+		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
+		actData.colOffSetPos = Vec2(-colSize.x, -colSize.y);
 		actData.colNum = 3;
 		actData.speed = Vec2(-3.0f, 0.0f);
 		actData.keyCode = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
@@ -112,11 +101,11 @@ void Player::Init()
 
 	// 右移動
 	{
-		actData.blackList.clear();
-		actData.actionType = PL_ACTION::RUN_SHOT;
-		actData.blackList.emplace_back(PL_ACTION::JUMP);
-		actData.blackList.emplace_back(PL_ACTION::RUN);
-		actData.colOffSetPos = Vec2(22.5f, -55.5f);
+		ActModule actData;
+		actData.actionType = PL_ACTION::LEFT_MOVE;
+		//actData.blackList.emplace_back(PL_ACTION::JUMP);
+		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
+		actData.colOffSetPos = Vec2(colSize.x, -colSize.y);
 		actData.colNum = 3;
 		actData.speed = Vec2(3.0f, 0.0f);
 		actData.keyCode = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
@@ -124,10 +113,44 @@ void Player::Init()
 		_actCtrl->AddAction(actData, "moveRight");
 	}
 
-	/*lpEffectMng.Create("circle", "Laser01.efk");
-	lpEffectMng.Scale("circle", 20);
-	lpEffectMng.Pos("circle", getPosition());
-	lpEffectMng.PlayEffect("circle", false);*/
+	// 落下
+	{
+		ActModule actData;
+		actData.actionType = PL_ACTION::FALL;
+		actData.blackList.emplace_back(PL_ACTION::JUMP);
+		actData.colOffSetPos = Vec2(-colSize.x, -colSize.y);
+		actData.colNum = 2;
+		actData.speed = Vec2(0.0f, 2.0f);
+		actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+		actData.trgType = INPUT_TRG::OFF;
+		_actCtrl->AddAction(actData, "moveDown");
+	}
+
+	// ジャンプ
+	{
+		ActModule actData;
+		actData.actionType = PL_ACTION::JUMP;
+		actData.blackList.emplace_back(PL_ACTION::JUMPING);
+		actData.colOffSetPos = Vec2(-colSize.x, colSize.y);
+		actData.colNum = 2;
+		actData.speed = Vec2(0.0f, _JumpSpeed);
+		actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		actData.trgType = INPUT_TRG::ON;
+		_actCtrl->AddAction(actData, "moveUp");
+	}
+
+	// ジャンプ
+	{
+		ActModule actData;
+		actData.actionType = PL_ACTION::JUMPING;
+		actData.blackList.emplace_back(PL_ACTION::FALL);
+		actData.colOffSetPos = Vec2(-colSize.x, colSize.y);
+		actData.colNum = 2;
+		actData.speed = Vec2(0.0f, _JumpSpeed);
+		actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		actData.trgType = INPUT_TRG::ON;
+		_actCtrl->AddAction(actData, "moveUp");
+	}
 
 	RunAnim(_animNow);
 	
@@ -146,53 +169,13 @@ void Player::update(float delta)
 	CkSound* sound = CkSound::newBankSound(bank, "my_sound");
 	sound->play();*/
 
-	/*if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOM)
+	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOMENT)
 	{
-		_effect.try_emplace("test", std::make_unique<EffectMng>());
-
-		_effect["test"]->AddEffect("EffectLayer");
-
-		auto effect = efk::Effect::create("Simple_Distortion.efk");
-		_effect["test"]->GetEfkEmitter().setPlayOnEnter(false);
-		_effect["test"]->GetEfkEmitter().setPosition(getPosition());
-		_effect["test"]->GetEfkEmitter().setScale(20);
-		_effect["test"]->GetEfkEmitter().setEffect(effect);
-
-		if (_effect["test"]->GetEfkEmitter().getPlayOnEnter())
-		{
-			_effect["test"]->GetEfkEmitter().setPlayOnEnter(false);
-		}
-		else if(!_effect["test"]->GetEfkEmitter().getPlayOnEnter())
-		{
-			_effect["test"]->GetEfkEmitter().setPlayOnEnter(true);
-		}
-	}
-
-	if (_effect.size())
-	{
-		for (auto &effect : _effect)
-		{
-			effect.second.get()->update();
-		}
-	}*/
-
-	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOM)
-	{
-
-		auto director = cocos2d::Director::getInstance();
-		/*if (lpEffectMng.Create("circle", "Laser01.efk"))
-		{*/
-			/*lpEffectMng.AddLayer("EffectLayer", "circle");*/
-
-		/*}
+		lpEffectMng.Create("circle", "Laser01.efk");
 		lpEffectMng.Scale("circle", 20);
 		lpEffectMng.Pos("circle", getPosition());
-		lpEffectMng.PlayEffect("circle", true);*/
-
-		auto effectLayer = director->getRunningScene()->getChildByName("EffectLayer");
-		auto emmiter = (efk::EffectEmitter*)effectLayer->getChildByName("circleEffect");
-		emmiter->setPlayOnEnter(true);
-		emmiter->setPosition(getPosition());
+		lpEffectMng.PlayEffect("circle", true);
+		lpEffectMng.AddLayer("EffectLayer", "circle");
 	}
 
 	lpEffectMng.update();
@@ -229,6 +212,16 @@ const PL_ACTION Player::GetActType()
 void Player::SetActType(PL_ACTION actType)
 {
 	_animNow = actType;
+}
+
+const float Player::GetJumpSpeed()
+{
+	return _JumpSpeed;
+}
+
+void Player::SetJumpSpeed(float jumpSpeed)
+{
+	_JumpSpeed = jumpSpeed;
 }
 
 void Player::RunAnim(PL_ACTION animType)

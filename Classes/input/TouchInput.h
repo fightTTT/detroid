@@ -1,5 +1,6 @@
 #pragma once
 #include "Input.h"
+
 struct TouchInput :
 	public Input
 {

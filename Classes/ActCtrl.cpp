@@ -29,17 +29,6 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 		return true;
 	}
 
-	if (str == "moveDown")
-	{
-		_actionData.insert(std::make_pair(str, actModule));
-		_actionData[str].checkList.emplace_back(KeyCheck());
-		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
-		_actionData[str].checkList.emplace_back(MoveCol());
-		_actionData[str].actRun = FallAct();
-
-		return true;
-	}
-
 	if (str == "moveUp")
 	{
 		_actionData.insert(std::make_pair(str, actModule));
@@ -47,6 +36,17 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
 		_actionData[str].actRun = JumpAct();
+
+		return true;
+	}
+
+	if (str == "moveDown")
+	{
+		_actionData.insert(std::make_pair(str, actModule));
+		_actionData[str].checkList.emplace_back(KeyCheck());
+		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
+		_actionData[str].checkList.emplace_back(MoveCol());
+		_actionData[str].actRun = FallAct();
 
 		return true;
 	}
@@ -76,6 +76,7 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 				return false;
 			}
 		}
+
 		return true;
 	};
 
@@ -89,24 +90,45 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 		{
 			return true;
 		}
+
 		return sprite.isFlippedX();
 	};
+
 
 	bool idleFlag = true;
 	for (auto &data : _actionData)
 	{
 		if (CheckAct(data.second))
 		{
-			_actionData[data.first].actRun(sprite, data.second);
+			if (data.first == "idle")
+			{
+				continue;
+			}
+
 			((Player&)sprite).SetActType(data.second.actionType);
-			idleFlag = false;
+			if (data.second.actionType == PL_ACTION::JUMP)
+			{
+				if (data.second.speed.y <= 0)
+				{
+					data.second.speed.y = 10.0f;
+					continue;
+				}
+			}
+			_actionData[data.first].actRun(sprite, data.second);
 			sprite.setFlippedX(CheckFlip(data.second.keyCode));
+			idleFlag = false;
 		}
 	}
 
 	if (idleFlag)
 	{
+		_actionData["idle"].actRun(sprite, _actionData["idle"]);
 		((Player&)sprite).SetActType(PL_ACTION::IDLE);
 	}
+}
+
+char ActCtrl::GetActKeyCode(std::string actName)
+{
+	return static_cast<char>(_actionData[actName].keyCode);
 }
 

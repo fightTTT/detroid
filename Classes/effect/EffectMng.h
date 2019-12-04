@@ -1,8 +1,11 @@
 #pragma once
 #include "Effekseer.h"
 #include <map>
+#include <vector>
 
 #define lpEffectMng EffectMng::GetInstance()
+
+using EffectData = std::map<std::string, efk::EffectEmitter*>;
 
 
 class EffectMng
@@ -36,7 +39,8 @@ private:
 	static EffectMng *s_Instance;
 
 	// 登録したエフェクトを管理するマップ
-	std::map<std::string, efk::EffectEmitter*> effectData;
+	std::vector<efk::EffectEmitter*> effectData;
+
 
 	efk::EffectManager* manager = nullptr;
 	int count = 0;

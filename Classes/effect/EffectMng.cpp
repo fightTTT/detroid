@@ -31,37 +31,39 @@ bool EffectMng::Create(std::string effectName,std::string imageName)
 	{
 		return false;
 	}
-	if (effectData.insert(std::make_pair(effectName, efk::EffectEmitter::create(manager))).second)
-	{
-		effectData[effectName]->setEffect(effect);
+	effectData.emplace_back(efk::EffectEmitter::create(manager));
+	
+	effectData.back()->setEffect(effect);
 
-		return true;
-	}
+		//return true;
+	
 	return false;
 }
 
 void EffectMng::Pos(std::string effectName, cocos2d::Vec2 pos)
 {
-	effectData[effectName]->setPosition(pos);
+	effectData.back()->setPosition(pos);
 }
 
 void EffectMng::Scale(std::string effectName, int scale)
 {
-	effectData[effectName]->setScale(scale);
+	effectData.back()->setScale(scale);
 }
 
 void EffectMng::PlayEffect(std::string effectName, bool playEffect)
 {
-	effectData[effectName]->setPlayOnEnter(playEffect);
+	effectData.back()->setPlayOnEnter(playEffect);
 }
 
 efk::EffectEmitter* EffectMng::AddLayer(std::string layerName, std::string effectName)
 {
-	//auto director = cocos2d::Director::getInstance();
+	auto director = cocos2d::Director::getInstance();
 	manager->setIsDistortionEnabled(true);
-	//director->getRunningScene()->getChildByName(layerName)->addChild(effectData[effectName]);
-
-	return effectData[effectName];
+	//effectClone.emplace_back(effectData[effectName]);
+	auto a = director->getRunningScene()->getChildByName(layerName);
+	a->addChild(effectData.back())
+	;
+	return effectData.back();
 }
 
 void EffectMng::update()
@@ -74,10 +76,10 @@ void EffectMng::update()
 
 	for (auto effect : effectData)
 	{
-		effect.second->setRemoveOnStop(false);
-		if (effect.second->getPlayOnEnter())
+		//effect->setRemoveOnStop(false);
+		if (effect->getPlayOnEnter())
 		{
-			effect.second->setIsLooping(true);
+			//effect->setIsLooping(true);
 		}
 	}
 

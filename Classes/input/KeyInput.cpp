@@ -9,29 +9,27 @@ void KeyInput::Init(Node * node)
 {
 	for (int keyCode = 0; keyCode < static_cast<int>(EventKeyboard::KeyCode::KEY_PLAY); keyCode++)
 	{
-		inputType.insert(std::make_pair(CHAR(KEYCODE(keyCode)), INPUT_TRG::OFF));
+		_inputType.insert(std::make_pair(CHAR(KEYCODE(keyCode)), INPUT_TRG::OFF));
 	}
 	
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = [&](EventKeyboard::KeyCode keyCode, cocos2d::Event* event)->bool
 	{
-		
-		if (!nowInputType.insert(std::make_pair(CHAR(keyCode), 1)).second)
+		if (!_nowInputType.insert(std::make_pair(CHAR(keyCode), 1)).second)
 		{
-			nowInputType[CHAR(keyCode)] = 1;
+			_nowInputType[CHAR(keyCode)] = 1;
 		}
 		
-		inputType[CHAR(keyCode)] = INPUT_TRG::ON_MOM;
+		_inputType[CHAR(keyCode)] = INPUT_TRG::ON_MOMENT;
 		
 		return true;
 	};
 
 	listener->onKeyReleased = [&](EventKeyboard::KeyCode keyCode, Event* event)->bool
 	{
+		_nowInputType[CHAR(keyCode)] = 0;
 
-		nowInputType[CHAR(keyCode)] = 0;
-
-		inputType[CHAR(keyCode)] = INPUT_TRG::OFF_MOM;
+		_inputType[CHAR(keyCode)] = INPUT_TRG::OFF_MOM;
 
 		if(keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
 		{
@@ -46,20 +44,19 @@ void KeyInput::Init(Node * node)
 
 void KeyInput::Update()
 {
-	
-	for (auto trgType : nowInputType)
+	for (auto trgType : _nowInputType)
 	{
 		// oldKeyÇ∆NowKeyÇÃì¸óÕèÛë‘Ç™à·Ç¡ÇƒÇ¢ÇΩÇ∆Ç´Ç…íÜÇ…ì¸ÇÈ
-		if (oldInputType[trgType.first] != nowInputType[trgType.first])
+		if (_oldInputType[trgType.first] != _nowInputType[trgType.first])
 		{
 			// âüÇµÇΩèuä‘,ó£ÇµÇΩèuä‘ÇÃèÓïÒÇâüÇµë±ÇØÇÈÅAó£Çµë±ÇØÇÈÇ…ïœÇ¶ÇÈ
-			if (inputType[CHAR(trgType.first)] == INPUT_TRG::ON_MOM)
+			if (_inputType[CHAR(trgType.first)] == INPUT_TRG::ON_MOMENT)
 			{
-				inputType[CHAR(trgType.first)] = INPUT_TRG::ON;
+				_inputType[CHAR(trgType.first)] = INPUT_TRG::ON;
 			}
-			else if (inputType[CHAR(trgType.first)] == INPUT_TRG::OFF_MOM)
+			else if (_inputType[CHAR(trgType.first)] == INPUT_TRG::OFF_MOM)
 			{
-				inputType[CHAR(trgType.first)] = INPUT_TRG::OFF;
+				_inputType[CHAR(trgType.first)] = INPUT_TRG::OFF;
 			}
 			else
 			{
@@ -67,9 +64,9 @@ void KeyInput::Update()
 			}
 		}
 
-		if (oldInputType.insert(std::make_pair(CHAR(trgType.first),nowInputType[trgType.first])).second)
+		if (_oldInputType.insert(std::make_pair(CHAR(trgType.first),_nowInputType[trgType.first])).second)
 		{
-			oldInputType[trgType.first] = nowInputType[trgType.first];
+			_oldInputType[trgType.first] = _nowInputType[trgType.first];
 		}
 	}
 }

@@ -9,6 +9,5 @@ struct KeyInput :
 	void Update() override;
 
 private:
-	std::map<char, char> nowInputType;			// 現在入力していいるキー
-	std::map<char, char> oldInputType;			// 1フレーム前入力していたキー
+
 };
