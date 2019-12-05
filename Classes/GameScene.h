@@ -49,10 +49,6 @@ public:
 	virtual void visit(cocos2d::Renderer *renderer, const cocos2d::Mat4& parentTransform, uint32_t parentFlags) override;
 	Player* player;
 
-	efk::EffectManager*		manager = nullptr;
-	efk::EffectEmitter*		emitter;
-	int count = 0;
-
     // implement the "static create()" method manually
     CREATE_FUNC(GameScene);
 };

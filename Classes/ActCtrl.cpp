@@ -3,6 +3,7 @@
 #include "input/KeyInput.h"
 #include "FallAct.h"
 #include "JumpAct.h"
+#include "jumpingAct.h"
 #include "MoveLR.h"
 #include "KeyCheck.h"
 #include "BlackWhiteCheck.h"
@@ -21,10 +22,21 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 	if (str == "idle")
 	{
 		_actionData.insert(std::make_pair(str,actModule));
-		_actionData[str].checkList.emplace_back(KeyCheck());
+		//_actionData[str].checkList.emplace_back(KeyCheck());
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
 		_actionData[str].actRun = MoveLR();
+
+		return true;
+	}
+
+	if (str == "jumping")
+	{
+		_actionData.insert(std::make_pair(str, actModule));
+		_actionData[str].checkList.emplace_back(KeyCheck());
+		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
+		_actionData[str].checkList.emplace_back(MoveCol());
+		_actionData[str].actRun = JumpingAct();
 
 		return true;
 	}
@@ -43,7 +55,7 @@ bool ActCtrl::AddAction(ActModule & actModule, std::string str)
 	if (str == "moveDown")
 	{
 		_actionData.insert(std::make_pair(str, actModule));
-		_actionData[str].checkList.emplace_back(KeyCheck());
+		//_actionData[str].checkList.emplace_back(KeyCheck());
 		_actionData[str].checkList.emplace_back(BlackWhiteCheck());
 		_actionData[str].checkList.emplace_back(MoveCol());
 		_actionData[str].actRun = FallAct();
@@ -94,7 +106,7 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 		return sprite.isFlippedX();
 	};
 
-
+	bool jumpFlag = false;
 	bool idleFlag = true;
 	for (auto &data : _actionData)
 	{
@@ -105,20 +117,36 @@ void ActCtrl::Update(cocos2d::Sprite& sprite)
 				continue;
 			}
 
-			((Player&)sprite).SetActType(data.second.actionType);
-			if (data.second.actionType == PL_ACTION::JUMP)
+			if (data.second.actionType == PL_ACTION::JUMPING)
 			{
-				if (data.second.speed.y <= 0)
+				if (((Player&)sprite).GetJumpSpeed() <= 0)
 				{
-					data.second.speed.y = 10.0f;
+					//data.second.speed.y = 10.0f;
 					continue;
 				}
+				jumpFlag = true;
 			}
+			else if (data.second.actionType == PL_ACTION::JUMP)
+			{
+				jumpFlag = true;
+			}
+			else
+			{
+				// ‰½‚à‚µ‚È‚¢
+			}
+
+			((Player&)sprite).SetActType(data.second.actionType);
 			_actionData[data.first].actRun(sprite, data.second);
 			sprite.setFlippedX(CheckFlip(data.second.keyCode));
 			idleFlag = false;
 		}
 	}
+
+	if (!jumpFlag)
+	{
+		((Player&)sprite).SetJumpSpeed(0);
+	}
+
 
 	if (idleFlag)
 	{

@@ -41,7 +41,24 @@ using namespace cocos2d::experimental;
 using namespace CocosDenshion;
 #endif
 
+#if CK_PLATFORM_ANDROID
+#ifdef __cplusplus
+extern "C" {
+#endif
+	JNIEXPORT void JNICALL
+		Java_org_cocos2dx_cpp_AppActivity_initCricket(JNIEnv *env, jclass activity, jobject context) {
+		CkConfig config(env, context);
+		CkInit(&config);
+		CkBank *g_bank = CkBank::newBank("dsptouch.ckb");
+		CkSound *g_sound = CkSound::newBankSound(g_bank, 1);
+		g_sound->setLoopCount(-1);
+		g_sound->play();
+	}
+}
+#ifdef  __cpluspus
 
+#endif
+#endif
 
 USING_NS_CC;
 
@@ -61,6 +78,7 @@ AppDelegate::~AppDelegate()
 #elif USE_SIMPLE_AUDIO_ENGINE
     SimpleAudioEngine::end();
 #endif
+	//CkShutdown();
 }
 
 // if you want a different context, modify the value of glContextAttrs
@@ -129,7 +147,18 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//auto scene = HelloWorld::createScene();
 	//scene->setName("gameScene");
 	//// run
-	//director->runWithScene(scene);
+	//director->runWithScene(scene);zz
+	//CkSuspend();
+
+#if CK_PLATFORM_ANDROID
+	CkConfig config(env, activity);
+#else
+	CkConfig config;
+
+	CkInit(&config);
+
+#endif
+
 
     return true;
 }
@@ -156,4 +185,5 @@ void AppDelegate::applicationWillEnterForeground() {
     SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
     SimpleAudioEngine::getInstance()->resumeAllEffects();
 #endif
+	//CkResume();
 }

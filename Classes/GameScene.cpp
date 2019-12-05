@@ -24,8 +24,8 @@
 #include<memory>
 //#include <ck/ck.h>
 //#include <ck/config.h>
-//#include <ck/bank.h>
-//#include <ck/Sound.h>
+#include <ck/bank.h>
+#include <ck/Sound.h>
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
 #include "effect/EffectMng.h"
@@ -176,6 +176,10 @@ bool GameScene::init()
 //
 //	CkInit(&config);
 	
+
+	CkBank* bank = CkBank::newBank("D:/hallo/MyCppGame/Resources/dsptouch.ckb", kCkPathType_FileSystem);
+	CkSound* sound = CkSound::newBankSound(bank, "my_sound");
+	sound->play();
 	return true;
 }
 

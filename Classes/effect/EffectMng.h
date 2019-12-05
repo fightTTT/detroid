@@ -21,11 +21,12 @@ public:
 		return *s_Instance;
 	}
 	
-	bool Create(std::string effectName, std::string imageName);
-	void Pos(std::string effectName, cocos2d::Vec2 pos);
-	void Scale(std::string effectName, int scale);
-	void PlayEffect(std::string effectName, bool playEffect);
-	efk::EffectEmitter* AddLayer(std::string layerName, std::string effectName);
+	bool Create(std::string imageName);
+	void Pos(cocos2d::Vec2 pos);
+	void Scale(int scale);
+	void PlayEffect(bool playEffect);
+	void Rotate(cocos2d::Vec3 pos);
+	efk::EffectEmitter* AddLayer(std::string layerName);
 
 	void update();
 //-------------------

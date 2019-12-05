@@ -24,7 +24,7 @@ bool EffectMng::Init()
 	return false;
 }
 
-bool EffectMng::Create(std::string effectName,std::string imageName)
+bool EffectMng::Create(std::string imageName)
 {
 	auto effect = efk::Effect::create(imageName);
 	if (effect == nullptr)
@@ -40,22 +40,27 @@ bool EffectMng::Create(std::string effectName,std::string imageName)
 	return false;
 }
 
-void EffectMng::Pos(std::string effectName, cocos2d::Vec2 pos)
+void EffectMng::Pos(cocos2d::Vec2 pos)
 {
 	effectData.back()->setPosition(pos);
 }
 
-void EffectMng::Scale(std::string effectName, int scale)
+void EffectMng::Scale(int scale)
 {
 	effectData.back()->setScale(scale);
 }
 
-void EffectMng::PlayEffect(std::string effectName, bool playEffect)
+void EffectMng::PlayEffect( bool playEffect)
 {
 	effectData.back()->setPlayOnEnter(playEffect);
 }
 
-efk::EffectEmitter* EffectMng::AddLayer(std::string layerName, std::string effectName)
+void EffectMng::Rotate(cocos2d::Vec3 rotate)
+{
+	effectData.back()->setRotation3D(rotate);
+}
+
+efk::EffectEmitter* EffectMng::AddLayer(std::string layerName)
 {
 	auto director = cocos2d::Director::getInstance();
 	manager->setIsDistortionEnabled(true);

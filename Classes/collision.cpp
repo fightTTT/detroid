@@ -1,14 +1,14 @@
-#include <vector>
 #include "collision.h"
 #include "cocos2d.h"
 #include "Console/_DebugConOut.h"
+#include "Player.h"
 
 USING_NS_CC;
 
 // 引数(当たり判定をしたいキャラの座標、キャラの画像のオフセット、キャラの向いている方向,当たり判定の数)
 bool MoveCol::operator()(Sprite & sprite, ActModule & actModule)
 {
-	if (actModule.colNum == 0)
+	if (actModule.colNum.x == 0 && actModule.colNum.y == 0)
 	{
 		return true;
 	}
@@ -24,33 +24,39 @@ bool MoveCol::operator()(Sprite & sprite, ActModule & actModule)
 	}
 
 	// 当たり判定ごとの間隔を求める
-	Vec2 offset = Vec2((std::abs(actModule.colOffSetPos.x) * 2) / (actModule.colNum - 1), 
-					   (std::abs(actModule.colOffSetPos.y) * 2) / (actModule.colNum - 1));
+	Vec2 offset = Vec2((std::abs(actModule.colOffsetPos.x) * 2) / (actModule.colNum.x - 1), 
+					   (std::abs(actModule.colOffsetPos.y) * 2) / (actModule.colNum.y - 1));
 
-	std::vector<Vec2> collisionPos;	// 当たり判定の座標
-
-	if (actModule.speed.y != 0.0f)
+	if (actModule.colNum.x == 0)
 	{
-		for (int i = 0; i < actModule.colNum; i++)
-		{
-			collisionPos.push_back(Vec2(sprite.getPosition().x + actModule.colOffSetPos.x + (offset.x * i),
-									sprite.getPosition().y + actModule.colOffSetPos.y));
-		}
+		offset.x =0;
 	}
-
-	if (actModule.speed.x != 0.0f)
+	else if(actModule.colNum.y == 0)
 	{
-		for (int i = 0; i < actModule.colNum; i++)
-		{
-			collisionPos.push_back(Vec2(sprite.getPosition().x + actModule.colOffSetPos.x,
-									sprite.getPosition().y + actModule.colOffSetPos.y + (offset.y * i)));
-		}
+		offset.y = 0;
 	}
-
-	for (auto &colPos : collisionPos)
+	else
 	{
-		colPos = Vec2((colPos.x + actModule.speed.x) / 48.0f,
-					 ( colPos.y - actModule.speed.y) / 48.0f);
+		// 何もしない
+	}
+	
+	for (int i = 0; i < std::max(actModule.colNum.x, actModule.colNum.y); i++)
+	{
+		Vec2 colPos = { 0,0 };
+		colPos = Vec2(sprite.getPosition().x + actModule.colOffsetPos.x + (offset.x * i),
+					  sprite.getPosition().y + actModule.colOffsetPos.y + (offset.y * i));
+
+		if (actModule.actionType == PL_ACTION::JUMPING)
+		{
+			colPos = Vec2((colPos.x + ((Player&)sprite).GetJumpSpeed()) / 48.0f,
+							(colPos.y + ((Player&)sprite).GetJumpSpeed()) / 48.0f);
+		}
+		else
+		{
+			colPos = Vec2((colPos.x + actModule.speed.x) / 48.0f,
+				(colPos.y - actModule.speed.y) / 48.0f);
+		}
+
 		colPos = Vec2(colPos.x, ground->getLayerSize().height - colPos.y);
 
 		// 画面範囲外制御
@@ -67,6 +73,7 @@ bool MoveCol::operator()(Sprite & sprite, ActModule & actModule)
 		{
 			return false;
 		}
+
 	}
 
 	return true;

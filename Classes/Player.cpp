@@ -33,6 +33,7 @@ Player::~Player()
 {
 	delete _input;
 	delete _actCtrl;
+
 }
 
 void Player::Init()
@@ -40,7 +41,7 @@ void Player::Init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	_animNow = PL_ACTION::IDLE;
+	_animNow = PL_ACTION::FALL;
 	_animOld = _animNow;
 	// アニメーション情報の登録
 	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]	    = { "playerData/idle.plist" ,"player-idle-" ,4 };
@@ -48,6 +49,7 @@ void Player::Init()
 	_playerAnimData[static_cast<int>(PL_ACTION::RIGHT_MOVE)]= { "playerData/run.plist" ,"player-run-" ,10 };
 	_playerAnimData[static_cast<int>(PL_ACTION::LEFT_MOVE)] = { "playerData/run.plist" ,"player-run-" ,10 };
 	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]	    = { "playerData/jump.plist" ,"player-jump-" ,6 };
+	_playerAnimData[static_cast<int>(PL_ACTION::JUMPING)] = { "playerData/jump.plist" ,"player-jump-" ,6 };
 	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)]  = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
 
 	_animName[static_cast<int>(PL_ACTION::IDLE)]		= "idle";
@@ -55,6 +57,7 @@ void Player::Init()
 	_animName[static_cast<int>(PL_ACTION::RIGHT_MOVE)]	= "run";
 	_animName[static_cast<int>(PL_ACTION::LEFT_MOVE)]	= "run";
 	_animName[static_cast<int>(PL_ACTION::JUMP)]		= "jump";
+	_animName[static_cast<int>(PL_ACTION::JUMPING)]		= "jump";
 	_animName[static_cast<int>(PL_ACTION::RUN_SHOT)]	= "run-shot";
 
 	// アニメーションの登録
@@ -64,12 +67,12 @@ void Player::Init()
 	}
 
 	// 初期座標と大きさの設定
-	setPosition(Vec2(300 + origin.x, visibleSize.height / 2 + origin.y + 150));
+	setPosition(Vec2(300 + origin.x, visibleSize.height / 2 + origin.y + 200));
 	setScale(1.0);
 
-	Vec2 colSize = { 25.0f, 70.0f };	// 当たり判定の半分のサイズ
+	Vec2 colSize = { 24.0f, 70.0f };	// 当たり判定の半分のサイズ
 
-	_JumpSpeed = 10.0f;
+	_JumpSpeed = 0.0;
 	
 	// ノーマル(立ち状態)
 	{
@@ -80,8 +83,8 @@ void Player::Init()
 		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
 		actData.blackList.emplace_back(PL_ACTION::RUN_SHOT);
 		actData.blackList.emplace_back(PL_ACTION::FALL);
-		actData.colNum = 0;
-		actData.speed = Vec2(0.0f, 0.0f);
+		actData.colNum = { 0,0 };
+		actData.speed = { 0.0f, 0.0f };
 		_actCtrl->AddAction(actData, "idle");
 	}
 
@@ -89,11 +92,12 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::RIGHT_MOVE;
+		actData.blackList.emplace_back(PL_ACTION::JUMPING);
 		//actData.blackList.emplace_back(PL_ACTION::JUMP);
 		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
-		actData.colOffSetPos = Vec2(-colSize.x, -colSize.y);
-		actData.colNum = 3;
-		actData.speed = Vec2(-3.0f, 0.0f);
+		actData.colOffsetPos = { -colSize.x, -colSize.y };
+		actData.colNum = { 0,5 };
+		actData.speed = { -3.0f, 0.0f };
 		actData.keyCode = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
 		actData.trgType = INPUT_TRG::ON;
 		_actCtrl->AddAction(actData, "moveLeft");
@@ -103,11 +107,12 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::LEFT_MOVE;
+		actData.blackList.emplace_back(PL_ACTION::JUMPING);
 		//actData.blackList.emplace_back(PL_ACTION::JUMP);
 		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
-		actData.colOffSetPos = Vec2(colSize.x, -colSize.y);
-		actData.colNum = 3;
-		actData.speed = Vec2(3.0f, 0.0f);
+		actData.colOffsetPos = { colSize.x, -colSize.y };
+		actData.colNum = { 0,5 };
+		actData.speed = { 3.0f, 0.0f };
 		actData.keyCode = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
 		actData.trgType = INPUT_TRG::ON;
 		_actCtrl->AddAction(actData, "moveRight");
@@ -117,10 +122,10 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::FALL;
-		actData.blackList.emplace_back(PL_ACTION::JUMP);
-		actData.colOffSetPos = Vec2(-colSize.x, -colSize.y);
-		actData.colNum = 2;
-		actData.speed = Vec2(0.0f, 2.0f);
+		actData.blackList.emplace_back(PL_ACTION::JUMPING);
+		actData.colOffsetPos = { -colSize.x, -colSize.y };
+		actData.colNum = { 2, 0};
+		actData.speed = { 0.0f, 2.0f };
 		actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 		actData.trgType = INPUT_TRG::OFF;
 		_actCtrl->AddAction(actData, "moveDown");
@@ -130,26 +135,29 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::JUMP;
+		actData.blackList.emplace_back(PL_ACTION::FALL);
 		actData.blackList.emplace_back(PL_ACTION::JUMPING);
-		actData.colOffSetPos = Vec2(-colSize.x, colSize.y);
-		actData.colNum = 2;
-		actData.speed = Vec2(0.0f, _JumpSpeed);
+		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
+		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
+		actData.colOffsetPos = { -colSize.x, colSize.y };
+		actData.colNum = { 2,0 };
+		actData.speed = Vec2(0.0f, 10.0f);
 		actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
 		actData.trgType = INPUT_TRG::ON;
 		_actCtrl->AddAction(actData, "moveUp");
 	}
 
-	// ジャンプ
+	// ジャンプ中
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::JUMPING;
-		actData.blackList.emplace_back(PL_ACTION::FALL);
-		actData.colOffSetPos = Vec2(-colSize.x, colSize.y);
-		actData.colNum = 2;
-		actData.speed = Vec2(0.0f, _JumpSpeed);
-		actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
+		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
+		actData.colOffsetPos = { -colSize.x, colSize.y };
+		actData.colNum = { 2, 0 };
+		actData.speed = { 0.0f, 10.0f };
 		actData.trgType = INPUT_TRG::ON;
-		_actCtrl->AddAction(actData, "moveUp");
+		_actCtrl->AddAction(actData, "jumping");
 	}
 
 	RunAnim(_animNow);
@@ -161,21 +169,32 @@ void Player::Init()
 #endif
 	_input->Init(this);
 	this->scheduleUpdate();
+
+
+	/*CkMixer* master = CkMixer::getMaster();
+	master->setVolume(0.1f);*/
 }
 
 void Player::update(float delta)
 {
-	/*CkBank* bank = CkBank::newBank("my_bank.ckb");
-	CkSound* sound = CkSound::newBankSound(bank, "my_sound");
-	sound->play();*/
+	
+
 
 	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOMENT)
 	{
-		lpEffectMng.Create("circle", "Laser01.efk");
-		lpEffectMng.Scale("circle", 20);
-		lpEffectMng.Pos("circle", getPosition());
-		lpEffectMng.PlayEffect("circle", true);
-		lpEffectMng.AddLayer("EffectLayer", "circle");
+		lpEffectMng.Create( "Laser01.efk");
+		lpEffectMng.Scale(20);
+		lpEffectMng.Pos(getPosition());
+		lpEffectMng.PlayEffect(true);
+
+		lpEffectMng.Rotate({ 0.0f,90.0f,0.0f });
+		if (isFlippedX())
+		{
+			lpEffectMng.Rotate({ 0.0f,-90.0f,0.0f });
+		}
+		
+
+		lpEffectMng.AddLayer("EffectLayer");
 	}
 
 	lpEffectMng.update();

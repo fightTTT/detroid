@@ -1,4 +1,5 @@
 #pragma once
+
 #include <tuple>
 #include <map>
 #include <list>
@@ -44,6 +45,7 @@ public:
 	const float GetJumpSpeed();
 	void SetJumpSpeed(float jumpSpeed);
 private:
+
 	Input* _input;
 
 	ActCtrl* _actCtrl;

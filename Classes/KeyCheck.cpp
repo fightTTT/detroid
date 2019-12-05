@@ -5,7 +5,7 @@ bool KeyCheck::operator()(cocos2d::Sprite & sprite, ActModule & actModule)
 {
 	if (actModule.actionType == PL_ACTION::IDLE
 	 || actModule.actionType == PL_ACTION::FALL
-	 || actModule.actionType == PL_ACTION::JUMP)
+	 || actModule.actionType == PL_ACTION::JUMPING)
 	{
 		return true;
 	}
