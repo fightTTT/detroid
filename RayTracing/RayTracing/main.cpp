@@ -101,11 +101,11 @@ Vector3 ReflectedVector(const Vector3& inVec, const Vector3& normalVec)
 {
 	return inVec - normalVec * Dot(inVec, normalVec) * 2;
 }
+
 Color PlaneColor(Vector3 hitPos)
 {
-	Color color1 = {0.4,0.8,0.6};
-
-	Color color2 = {0.7,0.3,0.5 };
+	Color color1 = { 0.9,0.9,0.4 };
+	Color color2 = {0.4,0.4,0.9 };
 	Color color = color1;
 	if ((int)hitPos.z / tileSize % 2 && (int)hitPos.x / tileSize % 2
 		|| (int)hitPos.z / tileSize % 2 == 0 && (int)hitPos.x / tileSize % 2 == 0)
@@ -251,7 +251,7 @@ void RayTracing(const Position3& eye,const Sphere& sphere)
 				Vector3 reflectVec = ReflectedVector(eyeVec, normal);
 				reflectVec.Normalize();
 
-				float albedo[3] = { 0.5f , 0.8f, 0.8f };
+				float albedo[3] = { 1.0f , 1.0f, 1.0f };
 				float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
 				float color[3] = { diffuse[0] + spacular + 0.1f,diffuse[1] + spacular + 0.1f,diffuse[2] + spacular + 0.1f };
 
@@ -259,7 +259,7 @@ void RayTracing(const Position3& eye,const Sphere& sphere)
 				{
 					color[i] = Clamp(color[i]);
 				}
-					
+		
 				int b = 255;
 
 				auto hoge = GetColor(b * color[0]* ReflectHitColor(hitPos, reflectVec).x,

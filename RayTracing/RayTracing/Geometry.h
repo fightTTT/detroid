@@ -148,4 +148,24 @@ struct Plane
 	float offSet;		// 原点からのオフセット
 };
 
+///直線(視線)を表す構造体
+struct RayLine
+{
+	Position3 start;	// 視線座標
+	Vector3	  vector;	// 方向を表すベクトル
 
+	///コンストラクタ 
+	///@param 視点(始点) 
+	///@param 方向を表すベクトル 
+	RayLine(const Position3& s, Vector3& v):start(s),vector(v.Normalized()) {} 
+
+	///視点と終点から視線を生成 
+	///@param 視点(始点) 
+	///@param 終点
+	void InitFromStartEnd(const Vector3& s, const Vector3& e)
+	{
+		start = s;
+
+		vector = (e - start).Normalized();
+	}
+};
