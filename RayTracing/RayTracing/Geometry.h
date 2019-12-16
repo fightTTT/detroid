@@ -106,11 +106,11 @@ struct Circle {
 
 
 ///球を表す構造体
-struct Sphere {
+struct Sphere1 {
 	float radius;//半径
 	Position3 pos; //中心座標
-	Sphere() :radius(0), pos(0, 0,0) {}
-	Sphere(float r, Position3& p) :radius(r), pos(p) {}
+	Sphere1() :radius(0), pos(0, 0,0) {}
+	Sphere1(float r, Position3& p) :radius(r), pos(p) {}
 };
 
 ///矩形を表す構造体
@@ -142,7 +142,7 @@ struct Rect {
 	void Draw(Vector2& offset);//自分の矩形を描画する(オフセット付き)
 };
 
-struct Plane
+struct Plane1
 {
 	Vector3 normal;		// 法線ベクトル
 	float offSet;		// 原点からのオフセット
@@ -157,7 +157,7 @@ struct RayLine
 	///コンストラクタ 
 	///@param 視点(始点) 
 	///@param 方向を表すベクトル 
-	RayLine(const Position3& s, Vector3& v):start(s),vector(v.Normalized()) {} 
+	RayLine(const Position3& s,const Vector3& v):start(s),vector(v) {} 
 
 	///視点と終点から視線を生成 
 	///@param 視点(始点) 

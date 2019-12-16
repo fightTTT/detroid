@@ -1,6 +1,6 @@
-#include"Geometry.h"
-#include<DxLib.h>
-#include<cmath>
+#include "Geometry.h"
+#include <DxLib.h>
+#include <cmath>
 
 
 
