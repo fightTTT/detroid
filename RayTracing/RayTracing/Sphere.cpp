@@ -44,3 +44,41 @@ float Sphere::DistanceFromStart(const Position3 & pos)
 
 	return (lengs - radius);
 }
+
+Position3 Sphere::position() const
+{
+	return pos;
+}
+
+Color Sphere::specDefCol(const Material& material,const Color& albed, const Vector3 & light, const Position3 & hitPos, const Vector3 & normal, const Position3 & eye)
+{
+	auto nvec = normal;
+
+	float dif = Dot(light, normal);
+	if (dif <= 0)
+	{
+		
+		nvec = -nvec;
+	}
+
+	auto reflect = light - nvec * dif * 2;
+
+	reflect.Normalize();
+	auto notEyeVec = eye - hitPos;
+	notEyeVec.Normalize();
+
+	float spacular = material.reflectance * 1 * abs(std::pow(Dot(reflect, notEyeVec), material.specularity));
+	dif = material.reflectance * dif;
+	dif = Clamp(dif);
+
+	auto col = Color((dif * albed.x), (dif * albed.y), (dif * albed.z));
+
+	col = { col.x + spacular + 0.1f,col.y + spacular + 0.1f, col.z + spacular + 0.1f, };
+
+	col.x = Clamp(col.x);
+	col.y = Clamp(col.y);
+	col.z = Clamp(col.z);
+	//auto b = Clamp(col.y);
+
+	return col;
+}

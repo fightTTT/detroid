@@ -17,6 +17,9 @@ public:
 	//指定座標からの最短距離(球だったら中心との距離-半径。平面だったら垂線の長さ) 
 	float DistanceFromStart(const Position3& pos)override;
 
+	Position3 position()const override;
+
+	Color specDefCol(const Material& material, const Color& albed, const Vector3& lite, const Position3& hitPos, const Vector3& normal, const Position3& eye)override;
 private:
 	float radius;	// 半径
 	Position3 pos;	// 中心座標

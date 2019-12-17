@@ -1,5 +1,6 @@
 #include <dxlib.h>
 #include <cmath>
+#include <vector>
 #include "Geometry.h"
 #include "Plane.h"
 #include "Sphere.h"
@@ -17,6 +18,7 @@ Vector3	light(1, 1, 1);
 //ヒントになると思って、色々と関数を用意しておりますが
 //別にこの関数を使わなければいけないわけでも、これに沿わなければいけないわけでも
 //ありません。レイトレーシングができていれば構いません。
+
 
 
 ///レイ(光線)と球体の当たり判定
@@ -217,10 +219,83 @@ bool DrawShadow(const Sphere1& sp,const Position3& PlanePos, const Vector3& ligh
 	return true;
 }
 
+Color RecursiveTrace(const Vector3& light, const Position3& startPos, const Vector3& ray, const std::vector<GeometryObject*>& obj, GeometryObject* self)
+{
+	Position3 hitPos = { 0,0,0 };
+	Color col;
+	RayLine rayLine(startPos, ray);
+	Color hoge;
+
+	for (auto& prim : obj)
+	{
+		if (prim == self)
+		{
+			continue;
+		}
+
+		Vector3 normal = { 0,0,0 };
+		if (self->CheckHit(rayLine, hitPos, normal))
+		{
+			Vector3 reflectVec = ReflectedVector(ray, normal);
+			reflectVec.Normalize();
+
+			hoge = Color(ReflectHitColor(hitPos, reflectVec).x,
+								ReflectHitColor(hitPos, reflectVec).y,
+								ReflectHitColor(hitPos, reflectVec).z);
+//			if (prim->GetMaterial().reflectance > 0.1f) {
+//
+//				col = prim->specDefCol(prim->GetMaterial(), prim->GetMaterial().diffuse, light, hitPos, normal, startPos);
+//				
+//				/*col.x = Clamp(col.x);
+//				col.y = Clamp(col.y);
+//				col.y = 0;
+//				col.z = Clamp(col.z);
+//*/
+//			}
+//			else
+//			{
+//				//col = prim->GetMaterial().diffuse;
+//				if (prim->GetMaterial().pattern == Pattern::checkered)
+//				{
+//					//PlaneColor(hitPos);
+//					col = PlaneColor(hitPos);
+//					
+//				}
+//				
+//			}
+		
+
+			//col *= 255;
+
+			/*Vector3 reflectVec = ReflectedVector(ray, normal);
+			reflectVec.Normalize();
+
+			float albedo[3] = { 1.0f , 0.0f, 0.0f };
+			float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
+			float color[3] = { diffuse[0] + spacular + 0.1f,diffuse[1] + spacular + 0.1f,diffuse[2] + spacular + 0.1f };
+
+			for (int i = 0; i < 3; i++)
+			{
+				color[i] = Clamp(color[i]);
+			}
+
+			int b = 255;
+
+			auto hoge = GetColor(b * color[0] * ReflectHitColor(hitPos, reflectVec).x,
+				b * color[1] * ReflectHitColor(hitPos, reflectVec).y,
+				b * color[2] * ReflectHitColor(hitPos, reflectVec).z);*/
+				/*float c = (400.f - distance) / 100.f;*/
+
+		}
+	}
+
+	return hoge;
+}
+
 ///レイトレーシング
 ///@param eye 視点座標
 ///@param sphere 球オブジェクト(そのうち複数にする)
-void RayTracing(const Position3& eye,const Sphere1& sphere) 
+void RayTracing(const Position3& eye,std::vector<GeometryObject*> obj) 
 {
 	for (int y = 0; y < screen_height; ++y) {//スクリーン縦方向
 		for (int x = 0; x < screen_width; ++x) {//スクリーン横方向
@@ -233,7 +308,7 @@ void RayTracing(const Position3& eye,const Sphere1& sphere)
 
 			auto plane = DrawPlane(eye, ray, DrawPlaneFlag, PlanePos);
 
-			if (DrawShadow(sphere, PlanePos, light))
+			/*if (DrawShadow(sphere, PlanePos, light))
 			{
 				plane.x = plane.x + (-0.3);
 				plane.y = plane.y + (-0.3);
@@ -245,37 +320,123 @@ void RayTracing(const Position3& eye,const Sphere1& sphere)
 			if (DrawPlaneFlag)
 			{
 				DrawPixel(x, y, GetColor(plane.x, plane.y, plane.z));
-			}
+			}*/
 	
 			//③IsHitRay関数がTrueだったら白く塗りつぶす
 			//※塗りつぶしはDrawPixelという関数を使う。
 
-			Vector3 normal = { 0,0,0 };
+			
 			Position3 hitPos = { 0,0,0 };
 
-			if ((IsHitRayAndObject(eye,ray,sphere, normal,hitPos)))
+			RayLine rayLine(eye, ray);
+			Color a;
+			Color col;
+			for (auto& o : obj)
+			{
+				Vector3 normal = { 0,0,0 };
+				//if (o->CheckHit(rayLine, hitPos,normal)/*(IsHitRayAndObject(eye, ray, sphere, normal, hitPos))*/)
+				//{
+
+				//	Color col = o->GetMaterial().diffuse;
+				//	if (o->GetMaterial().pattern == Pattern::checkered)
+				//	{
+				//		PlaneColor(hitPos);
+				//		col = { PlaneColor(hitPos).x * 255,PlaneColor(hitPos).y * 255,PlaneColor(hitPos).z * 255, };
+				//	}
+
+				//	/*Vector3 reflectVec = ReflectedVector(ray, normal);
+				//	reflectVec.Normalize();
+
+				//	float albedo[3] = { 1.0f , 0.0f, 0.0f };
+				//	float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
+				//	float color[3] = { diffuse[0] + spacular + 0.1f,diffuse[1] + spacular + 0.1f,diffuse[2] + spacular + 0.1f };
+
+				//	for (int i = 0; i < 3; i++)
+				//	{
+				//		color[i] = Clamp(color[i]);
+				//	}
+
+				//	int b = 255;
+
+				//	auto hoge = GetColor(b * color[0] * ReflectHitColor(hitPos, reflectVec).x,
+				//		b * color[1] * ReflectHitColor(hitPos, reflectVec).y,
+				//		b * color[2] * ReflectHitColor(hitPos, reflectVec).z);*/
+				//	/*float c = (400.f - distance) / 100.f;*/
+				//	
+				//}
+				
+				if (o->CheckHit(rayLine, hitPos, normal))
+				{
+					if (o->GetMaterial().reflectance > 0.1f) {
+
+						col = o->specDefCol(o->GetMaterial(), o->GetMaterial().diffuse, light, hitPos, normal, eye);
+
+						/*col.x = Clamp(col.x);
+						col.y = Clamp(col.y);
+						col.y = 0;
+						col.z = Clamp(col.z);
+		*/
+						col *= 255;
+					}
+					else
+					{
+						//col = prim->GetMaterial().diffuse;
+						if (o->GetMaterial().pattern == Pattern::checkered)
+						{
+							//PlaneColor(hitPos);
+							col = { PlaneColor(hitPos).x * 255,PlaneColor(hitPos).y * 255,PlaneColor(hitPos).z * 255, };
+						}
+					}
+
+
+					//col *= 255;
+
+					/*Vector3 reflectVec = ReflectedVector(ray, normal);
+					reflectVec.Normalize();
+
+					float albedo[3] = { 1.0f , 0.0f, 0.0f };
+					float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
+					float color[3] = { diffuse[0] + spacular + 0.1f,diffuse[1] + spacular + 0.1f,diffuse[2] + spacular + 0.1f };
+
+					for (int i = 0; i < 3; i++)
+					{
+						color[i] = Clamp(color[i]);
+					}
+
+					int b = 255;
+
+					auto hoge = GetColor(b * color[0] * ReflectHitColor(hitPos, reflectVec).x,
+						b * color[1] * ReflectHitColor(hitPos, reflectVec).y,
+						b * color[2] * ReflectHitColor(hitPos, reflectVec).z);*/
+						/*float c = (400.f - distance) / 100.f;*/
+
+				}
+
+				
+				a = { 1,1,1 };
+				if (o->GetMaterial().reflectance > 0.1f) {
+					a = RecursiveTrace(light, eye, ray, obj, o);
+				}
+
+				//col *= a;
+
+				if (o->CheckHit(rayLine, hitPos, normal))
+				{
+					
+					
+					DrawPixel(x, y, GetColor(col.x * a.x, col.y * a.y, col.z * a.z));
+
+				}
+			
+			}
+			/*if (obj[0]->CheckHit(rayLine, hitPos, normal))
 			{
 				Vector3 reflectVec = ReflectedVector(ray, normal);
 				reflectVec.Normalize();
 
 				float albedo[3] = { 1.0f , 0.0f, 0.0f };
-				float diffuse[3] = { Nmag * albedo[0],Nmag * albedo[1],Nmag * albedo[2] };
-				float color[3] = { diffuse[0] + spacular + 0.1f,diffuse[1] + spacular + 0.1f,diffuse[2] + spacular + 0.1f };
-
-				for (int i = 0; i < 3; i++)
-				{
-					color[i] = Clamp(color[i]);
-				}
-		
-				int b = 255;
-
-				auto hoge = GetColor(b * color[0]* ReflectHitColor(hitPos, reflectVec).x,
-							b * color[1]* ReflectHitColor(hitPos, reflectVec).y,
-							b * color[2] * ReflectHitColor(hitPos, reflectVec).z);
-				/*float c = (400.f - distance) / 100.f;*/
-				
-				DrawPixel(x, y, hoge);
-			}
+			}*/
+			
 		}
 	}
 }
@@ -286,12 +447,12 @@ int main()
 	SetGraphMode(screen_width, screen_height, 32);
 	SetMainWindowText(_T("1816019_作 明航"));
 	DxLib_Init();
-
+	DrawBox(0, 0, screen_width, screen_height, 0xAAC863, true);
 	float x = 0;
 
-	while (!CheckHitKey(KEY_INPUT_ESCAPE))
+	/*while (!CheckHitKey(KEY_INPUT_ESCAPE))
 	{
-		DrawBox(0, 0, screen_width, screen_height, 0xAAC863, true);
+		
 		if (CheckHitKey(KEY_INPUT_RIGHT))
 		{
 			x += 3.0f;
@@ -301,10 +462,15 @@ int main()
 			x -= 3.0f;
 		}
 
-		RayTracing(Vector3(0, 0, 300), Sphere1(100, Position3(x, 0, 100)));
-	}
-	
-	//WaitKey();
+
+	}*/
+	std::vector<GeometryObject*> obj;
+	obj.emplace_back(new Plane(Vector3(0, 1, 0), -100, Material({0.5,0.5,0},0,0,Pattern::checkered)));
+	obj.emplace_back(new Sphere(100, Position3(0, 0, 100), Material({ 1.0,0,0 }, 20, 0.5, Pattern::none)));
+	//obj.emplace_back(new Sphere(50, Position3(-50, 0, 50), Material({ 1.0,0,0 }, 20, 0.5, Pattern::none)));
+
+	RayTracing(Vector3(0, 0, 300), obj);
+	WaitKey();
 	
 	DxLib_End();
 }
