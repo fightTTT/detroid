@@ -18,8 +18,8 @@ void AnimationMng::AddAnim(PlayerAnimData & animData, std::string animName)
 {
 	auto animCache = AnimationCache::getInstance();
 	SpriteFrameCache* spriteCache = SpriteFrameCache::getInstance();
-	
 
+	// スプライトフレームの追加
 	spriteCache->addSpriteFramesWithFile(std::get<0>(animData));
 	std::string imageName = std::get<1>(animData) + std::to_string(1) + ".png";
 	Sprite::createWithSpriteFrameName(imageName);
@@ -33,9 +33,8 @@ void AnimationMng::AddAnim(PlayerAnimData & animData, std::string animName)
 		animation->addSpriteFrame(sprite);
 	}
 
+	// 遅延の設定
 	animation->setDelayPerUnit(0.08f);
-	//animation->setRestoreOriginalFrame(std::get<3>(playerAnimData[animTypeInt]));
-	//playerAnim[animTypeInt] = RepeatForever::create(Animate::create(animation));
 
 	animCache->addAnimation(animation, animName);
 }

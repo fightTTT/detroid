@@ -17,6 +17,7 @@ public:
 		return *s_Instance;
 	}
 
+	// アニメーション追加
 	void AddAnim(PlayerAnimData& animData, std::string animName);
 
 	~AnimationMng();
@@ -25,5 +26,4 @@ private:
 
 	static AnimationMng *s_Instance;
 
-	//cocos2d::FiniteTimeAction* playerAnim[static_cast<int>(PL_ACTION::MAX)];
 };

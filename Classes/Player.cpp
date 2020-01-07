@@ -8,6 +8,7 @@
 #endif
 #include "effect/EffectMng.h"
 
+USING_NS_CC;
 
 Sprite * Player::createSprite()
 {
@@ -41,33 +42,33 @@ void Player::Init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	_animNow = PL_ACTION::FALL;
-	_animOld = _animNow;
+	std::array<PlayerAnimData, static_cast<int>(PL_ACTION::MAX)> _playerAnimData;
+
 	// アニメーション情報の登録
-	_playerAnimData[static_cast<int>(PL_ACTION::IDLE)]	    = { "playerData/idle.plist" ,"player-idle-" ,4 };
-	_playerAnimData[static_cast<int>(PL_ACTION::FALL)]	    = { "playerData/idle.plist" ,"player-idle-" ,4 };
-	_playerAnimData[static_cast<int>(PL_ACTION::RIGHT_MOVE)]= { "playerData/run.plist" ,"player-run-" ,10 };
-	_playerAnimData[static_cast<int>(PL_ACTION::LEFT_MOVE)] = { "playerData/run.plist" ,"player-run-" ,10 };
-	_playerAnimData[static_cast<int>(PL_ACTION::JUMP)]	    = { "playerData/jump.plist" ,"player-jump-" ,6 };
-	_playerAnimData[static_cast<int>(PL_ACTION::JUMPING)] = { "playerData/jump.plist" ,"player-jump-" ,6 };
-	_playerAnimData[static_cast<int>(PL_ACTION::RUN_SHOT)]  = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
-
-	_animName[static_cast<int>(PL_ACTION::IDLE)]		= "idle";
-	_animName[static_cast<int>(PL_ACTION::FALL)]		= "idle";
-	_animName[static_cast<int>(PL_ACTION::RIGHT_MOVE)]	= "run";
-	_animName[static_cast<int>(PL_ACTION::LEFT_MOVE)]	= "run";
-	_animName[static_cast<int>(PL_ACTION::JUMP)]		= "jump";
-	_animName[static_cast<int>(PL_ACTION::JUMPING)]		= "jump";
-	_animName[static_cast<int>(PL_ACTION::RUN_SHOT)]	= "run-shot";
-
-	// アニメーションの登録
-	for (int animType = 0; animType < static_cast<int>(PL_ACTION::MAX); animType++)
 	{
-		lpAnimationMng.AddAnim(_playerAnimData[animType], _animName[animType]);
+		PlayerAnimData playerAnimData;
+
+		playerAnimData = { "playerData/idle.plist" ,"player-idle-" ,4 };
+		lpAnimationMng.AddAnim(playerAnimData, "idle");
+		playerAnimData = { "playerData/jump.plist" ,"player-jump-" ,6 };
+		lpAnimationMng.AddAnim(playerAnimData, "jump");
+		playerAnimData = { "playerData/run.plist" ,"player-run-" ,10 };
+		lpAnimationMng.AddAnim(playerAnimData, "run");
+		playerAnimData = { "playerData/run-shot.plist" ,"player-run-shot-" ,10 };
+		lpAnimationMng.AddAnim(playerAnimData, "run-shot");
 	}
 
+	_actNow = PL_ACTION::FALL;
+	_actOld = _actNow;
+
+	// アニメーションの登録
+	//for (int animType = 0; animType < static_cast<int>(PL_ACTION::MAX); animType++)
+	//{
+	//	lpAnimationMng.AddAnim(_playerAnimData[animType], _animName[animType]);
+	//}
+
 	// 初期座標と大きさの設定
-	setPosition(Vec2(300 + origin.x, visibleSize.height / 2 + origin.y + 200));
+	setPosition(Vec2(250 + origin.x, visibleSize.height / 2 + origin.y + 200));
 	setScale(1.0);
 
 	Vec2 colSize = { 24.0f, 70.0f };	// 当たり判定の半分のサイズ
@@ -79,6 +80,7 @@ void Player::Init()
 		ActModule actData;
 		actData.actionType = PL_ACTION::IDLE;
 		actData.blackList.emplace_back(PL_ACTION::JUMP);
+		actData.blackList.emplace_back(PL_ACTION::JUMPING);
 		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
 		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
 		actData.blackList.emplace_back(PL_ACTION::RUN_SHOT);
@@ -92,8 +94,6 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::RIGHT_MOVE;
-		actData.blackList.emplace_back(PL_ACTION::JUMPING);
-		//actData.blackList.emplace_back(PL_ACTION::JUMP);
 		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
 		actData.colOffsetPos = { -colSize.x, -colSize.y };
 		actData.colNum = { 0,5 };
@@ -107,8 +107,6 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::LEFT_MOVE;
-		actData.blackList.emplace_back(PL_ACTION::JUMPING);
-		//actData.blackList.emplace_back(PL_ACTION::JUMP);
 		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
 		actData.colOffsetPos = { colSize.x, -colSize.y };
 		actData.colNum = { 0,5 };
@@ -124,7 +122,7 @@ void Player::Init()
 		actData.actionType = PL_ACTION::FALL;
 		actData.blackList.emplace_back(PL_ACTION::JUMPING);
 		actData.colOffsetPos = { -colSize.x, -colSize.y };
-		actData.colNum = { 2, 0};
+		actData.colNum = { 2, 0 };
 		actData.speed = { 0.0f, 2.0f };
 		actData.keyCode = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 		actData.trgType = INPUT_TRG::OFF;
@@ -137,13 +135,11 @@ void Player::Init()
 		actData.actionType = PL_ACTION::JUMP;
 		actData.blackList.emplace_back(PL_ACTION::FALL);
 		actData.blackList.emplace_back(PL_ACTION::JUMPING);
-		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
-		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
 		actData.colOffsetPos = { -colSize.x, colSize.y };
 		actData.colNum = { 2,0 };
 		actData.speed = Vec2(0.0f, 10.0f);
 		actData.keyCode = EventKeyboard::KeyCode::KEY_UP_ARROW;
-		actData.trgType = INPUT_TRG::ON;
+		actData.trgType = INPUT_TRG::ON_MOMENT;
 		_actCtrl->AddAction(actData, "moveUp");
 	}
 
@@ -151,50 +147,58 @@ void Player::Init()
 	{
 		ActModule actData;
 		actData.actionType = PL_ACTION::JUMPING;
+		actData.blackList.emplace_back(PL_ACTION::FALL);
 		actData.blackList.emplace_back(PL_ACTION::RIGHT_MOVE);
 		actData.blackList.emplace_back(PL_ACTION::LEFT_MOVE);
 		actData.colOffsetPos = { -colSize.x, colSize.y };
 		actData.colNum = { 2, 0 };
-		actData.speed = { 0.0f, 10.0f };
-		actData.trgType = INPUT_TRG::ON;
+		actData.speed = { 0.0f, _JumpSpeed };
 		_actCtrl->AddAction(actData, "jumping");
 	}
 
-	RunAnim(_animNow);
+	RunAnim(_actNow);
+
+
+	lpEffectMng.AddEffect("Laser01.efk", "Laser");
 	
+
+
+	this->scheduleUpdate();
+}
+
+void Player::update(float delta)
+{
+	static bool inputFlag = false;
+
+	if (!inputFlag)
+	{
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 	_input = new KeyInput;
 #else
 	_input = new TouchInput;
 #endif
-	_input->Init(this);
-	this->scheduleUpdate();
+	auto layer = Director::getInstance()->getRunningScene()->getChildByName("MapLayer");
+	_input->Init(this, (Layer*)layer);
 
+	inputFlag = true;
+	lpEffectMng.Rotate("Laser", { 0.0f,90.0f,-90.0f });
+	lpEffectMng.Loop("Laser", true);
+	lpEffectMng.AddLayer("Laser", "EffectLayer", getPosition(), lpEffectMng.Rotate("Laser"));
+	}
 
-	/*CkMixer* master = CkMixer::getMaster();
-	master->setVolume(0.1f);*/
-}
-
-void Player::update(float delta)
-{
-	
-
-
-	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_0) == INPUT_TRG::ON_MOMENT)
+	// Zキーでレーザービーム発射
+	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_Z) == INPUT_TRG::ON_MOMENT)
 	{
-		lpEffectMng.Create( "Laser01.efk");
-		lpEffectMng.Scale(20);
-		lpEffectMng.Pos(getPosition());
-		lpEffectMng.PlayEffect(true);
-
-		lpEffectMng.Rotate({ 0.0f,90.0f,0.0f });
 		if (isFlippedX())
 		{
-			lpEffectMng.Rotate({ 0.0f,-90.0f,0.0f });
+			lpEffectMng.Rotate("Laser", { 0.0f,-90.0f,0.0f });
+		}
+		else
+		{
+			lpEffectMng.Rotate("Laser", { 0.0f,90.0f,0.0f });
 		}
 		
-
-		lpEffectMng.AddLayer("EffectLayer");
+		lpEffectMng.AddLayer("Laser", "EffectLayer", getPosition(), lpEffectMng.Rotate("Laser"));
 	}
 
 	lpEffectMng.update();
@@ -202,20 +206,25 @@ void Player::update(float delta)
 	//アニメーションの切り替え
 	auto animChange = [](Player* player)
 	{
-		if (player->_animOld != player->_animNow)
+		if (player->_actOld != player->_actNow)
 		{
 			player->stopAllActions();
-			player->RunAnim(player->_animNow);
+			player->RunAnim(player->_actNow);
 		}
 	};
 
+	// アクションの更新
 	_actCtrl->Update(*this);
 
+	// アニメーションの更新
 	animChange(this);
 
-	_animOld = _animNow;
+	// 1フレーム前のアクションを保存する
+	_actOld = _actNow;
 
+	// 入力状態の更新
 	_input->Update();
+
 }
 
 INPUT_TRG Player::GetInputTrg(EventKeyboard::KeyCode keyCode)
@@ -225,12 +234,12 @@ INPUT_TRG Player::GetInputTrg(EventKeyboard::KeyCode keyCode)
 
 const PL_ACTION Player::GetActType()
 {
-	return _animNow;
+	return _actNow;
 }
 
 void Player::SetActType(PL_ACTION actType)
 {
-	_animNow = actType;
+	_actNow = actType;
 }
 
 const float Player::GetJumpSpeed()
@@ -245,6 +254,26 @@ void Player::SetJumpSpeed(float jumpSpeed)
 
 void Player::RunAnim(PL_ACTION animType)
 {
-	Animate* anim = Animate::create(AnimationCache::getInstance()->getAnimation(_animName[static_cast<int>(animType)]));
+	Animate* anim;
+	if (animType == PL_ACTION::JUMP ||
+		animType == PL_ACTION::JUMPING ||
+		animType == PL_ACTION::FALL)
+	{
+		anim = Animate::create(AnimationCache::getInstance()->getAnimation("jump"));
+	}
+	else if (animType == PL_ACTION::LEFT_MOVE ||
+		animType == PL_ACTION::RIGHT_MOVE)
+	{
+		anim = Animate::create(AnimationCache::getInstance()->getAnimation("run"));
+	}
+	else if (animType == PL_ACTION::RUN_SHOT)
+	{
+		anim = Animate::create(AnimationCache::getInstance()->getAnimation("run-shot"));
+	}
+	else
+	{
+		anim = Animate::create(AnimationCache::getInstance()->getAnimation("idle"));
+	}
+
 	runAction(RepeatForever::create(anim));
 }

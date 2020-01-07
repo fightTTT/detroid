@@ -21,7 +21,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-
+//#include <ck/ck.h>
+//#include <ck/config.h>
 #include "AppDelegate.h"
 #include "GameScene.h"
 #include "effect/Effekseer.h"
@@ -41,24 +42,7 @@ using namespace cocos2d::experimental;
 using namespace CocosDenshion;
 #endif
 
-#if CK_PLATFORM_ANDROID
-#ifdef __cplusplus
-extern "C" {
-#endif
-	JNIEXPORT void JNICALL
-		Java_org_cocos2dx_cpp_AppActivity_initCricket(JNIEnv *env, jclass activity, jobject context) {
-		CkConfig config(env, context);
-		CkInit(&config);
-		CkBank *g_bank = CkBank::newBank("dsptouch.ckb");
-		CkSound *g_sound = CkSound::newBankSound(g_bank, 1);
-		g_sound->setLoopCount(-1);
-		g_sound->play();
-	}
-}
-#ifdef  __cpluspus
 
-#endif
-#endif
 
 USING_NS_CC;
 
@@ -78,7 +62,6 @@ AppDelegate::~AppDelegate()
 #elif USE_SIMPLE_AUDIO_ENGINE
     SimpleAudioEngine::end();
 #endif
-	//CkShutdown();
 }
 
 // if you want a different context, modify the value of glContextAttrs
@@ -104,7 +87,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto glview = director->getOpenGLView();
     if(!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-        glview = GLViewImpl::createWithRect("MyCppGame", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
+        glview = GLViewImpl::createWithRect("1816019_saku meikou", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
         glview = GLViewImpl::create("MyCppGame");
 #endif
@@ -138,27 +121,24 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     register_all_packages();
 
+#if CK_PLATFORM_ANDROID
+	//CkConfig config(env, activity);
+#else
+	//CkConfig config;
+
+	//CkInit(&config);
+#endif
+
     // create a scene. it's an autorelease object
     auto scene = GameScene::createScene();
 	scene->setName("gameScene");
     // run
     director->runWithScene(scene);
-
 	//auto scene = HelloWorld::createScene();
 	//scene->setName("gameScene");
 	//// run
-	//director->runWithScene(scene);zz
-	//CkSuspend();
-
-#if CK_PLATFORM_ANDROID
-	CkConfig config(env, activity);
-#else
-	CkConfig config;
-
-	CkInit(&config);
-
-#endif
-
+	//director->runWithScene(scene);
+	
 
     return true;
 }
@@ -173,6 +153,7 @@ void AppDelegate::applicationDidEnterBackground() {
     SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
     SimpleAudioEngine::getInstance()->pauseAllEffects();
 #endif
+	//CkSuspend();
 }
 
 // this function will be called when the app is active again
@@ -185,5 +166,5 @@ void AppDelegate::applicationWillEnterForeground() {
     SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
     SimpleAudioEngine::getInstance()->resumeAllEffects();
 #endif
-	//CkResume();
+	/*CkResume();*/
 }

@@ -1,10 +1,7 @@
 #pragma once
-
 #include <tuple>
-#include <map>
-#include <list>
 #include <array>
-#include "Character.h"
+#include "cocos2d.h"
 #include "input/Input.h"
 
 // プレイヤーアニメーションの種類
@@ -26,11 +23,11 @@ class ActCtrl;
 using PlayerAnimData = std::tuple<std::string, std::string, int>;
 
 class Player :
-	public Sprite
+	public cocos2d::Sprite
 {
 public:
 	// プレイヤークラスを生成する
-	static Sprite *createSprite();
+	static cocos2d::Sprite *createSprite();
 	Player();
 	~Player();
 	void Init();
@@ -44,20 +41,19 @@ public:
 	void SetActType(PL_ACTION actType);
 	const float GetJumpSpeed();
 	void SetJumpSpeed(float jumpSpeed);
+
 private:
 
 	Input* _input;
 
-	ActCtrl* _actCtrl;
+	ActCtrl* _actCtrl;		// アクションを管理
 
-	float _JumpSpeed;
+	float _JumpSpeed;		// ジャンプのスピード
 
 	// アニメーションの実行
 	void RunAnim(PL_ACTION animType);
-	std::array<std::string, static_cast<int>(PL_ACTION::MAX)> _animName;
-	std::array<PlayerAnimData, static_cast<int>(PL_ACTION::MAX)> _playerAnimData;
 
-	PL_ACTION _animNow;					// 現在のアニメーション
-	PL_ACTION _animOld;					// 1フレーム前のアニメーション
+	PL_ACTION _actNow;		// 現在のアニメーション
+	PL_ACTION _actOld;		// 1フレーム前のアニメーション
 	
 };

@@ -26,6 +26,9 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include <memory>
+//#include <ck/bank.h>
+//#include <ck/Sound.h>
+//#include <jni.h>
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h"
 #include "input/TouchInput.h"
@@ -33,6 +36,20 @@
 #include "Player.h"
 #include "effect/EffectMng.h"
 
+//#ifndef __ANDROID_JNI__
+//#define __ANDROID_JNI__
+#ifdef __cplusplus
+//extern "C" {
+//#endif
+//	JNIEXPORT void JNICALL	Java_org_cocos2dx_cpp_AppActivity_initCricket(
+//		JNIEnv *env,
+//		jclass activity,
+//		jobject context
+//	);
+//#ifdef __cplusplus
+//}
+//#endif
+#endif
 
 class GameScene : public cocos2d::Scene
 {
@@ -51,6 +68,11 @@ public:
 
     // implement the "static create()" method manually
     CREATE_FUNC(GameScene);
+
+private:
+	/*CkBank* bank;
+	CkSound* sound;*/
+	//char*   MultiByteToUTF8(const char* src);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

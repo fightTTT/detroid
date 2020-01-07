@@ -13,7 +13,7 @@ bool MoveCol::operator()(Sprite & sprite, ActModule & actModule)
 		return true;
 	}
 
-	auto mapLayer = Director::getInstance()->getRunningScene()->getChildByName("MapLayer");
+	auto mapLayer = Director::getInstance()->getRunningScene()->getChildByName("FollowerLayer")->getChildByName("MapLayer");
 	auto mapData = (TMXTiledMap*)mapLayer->getChildByName("MapData");
 	TMXLayer *ground = mapData->getLayer("ground");
 

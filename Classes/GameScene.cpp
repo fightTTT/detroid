@@ -24,13 +24,30 @@
 #include<memory>
 //#include <ck/ck.h>
 //#include <ck/config.h>
-#include <ck/bank.h>
-#include <ck/Sound.h>
 #include "GameScene.h"
 #include "SimpleAudioEngine.h"
 #include "effect/EffectMng.h"
 
 USING_NS_CC;
+
+#if CK_PLATFORM_ANDROID
+#ifdef __cplusplus
+extern "C" {
+#endif
+	JNIEXPORT void JNICALL
+		Java_org_cocos2dx_cpp_AppActivity_initCricket(JNIEnv *env, jclass activity, jobject context)
+	{
+		CkConfig config(env, context);
+		CkInit(&config);
+		CkBank *g_bank = CkBank::newBank("mymySound.ckb");
+		CkSound *g_sound = CkSound::newBankSound(g_bank, "mymy");
+		g_sound->setLoopCount(-1);
+		g_sound->play();
+	}
+}
+#ifdef  __cpluspus
+#endif
+#endif
 
 Scene* GameScene::createScene()
 {
@@ -109,19 +126,20 @@ bool GameScene::init()
     }
 
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
+    auto sprite = Sprite::create("1816019.png");
 	this->face = sprite;
     if (sprite == nullptr)
     {
-        problemLoading("'HelloWorld.png'");
+        problemLoading("1816019.png");
     }
     else
     {
         // position the sprite on the center of the screen
-        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-
+        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y+200));
         // add the sprite as a child to this layer
-        //this->addChild(sprite, 0);
+		//sprite->setGlobalZOrder(7);
+        this->addChild(sprite, 4);
+		
     }
 
 	auto bgLayer = Layer::create();
@@ -139,55 +157,69 @@ bool GameScene::init()
 	auto bg_ground = Sprite::create("image/Environment/background.png");
 	bg_ground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 	bgLayer->addChild(bg_ground);
-	this->addChild(bgLayer);
+	/*this->addChild(bgLayer);*/
 
 	auto mdl_ground = Sprite::create("image/Environment/middleground-no-fungus.png");
 	mdl_ground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 	mdlLayer->addChild(mdl_ground);
-	this->addChild(mdlLayer,1);
+	/*this->addChild(mdlLayer,1);*/
 
 	auto map = TMXTiledMap::create("untitled.tmx");
 	map->setPosition(0,0);
 	map->setName("MapData");
 	auto groundLayer = map->getLayer("ground");
 	groundLayer->setGlobalZOrder(0);
-	auto subGroundLayer = map->getLayer("subGround");
-	subGroundLayer->setGlobalZOrder(5);
+	/*auto subGroundLayer = map->getLayer("subGround");
+	subGroundLayer->setGlobalZOrder(2);*/
 	mapLayer->addChild(map);
-	this->addChild(mapLayer, 3);
+	/*this->addChild(mapLayer, 3);*/
+	auto player = Player::createSprite();
+	playerLayer->addChild(player);
+	/*this->addChild(playerLayer, 5);
 
-	player = new Player();
-	playerLayer->addChild(Player::createSprite());
-	this->addChild(playerLayer, 4);
+	this->addChild(effectLayer, 6);*/
 
-	
-	//effectLayer->addChild(lpEffectMng.AddLayer("EffectLayer", "circle"));
 
-	this->addChild(effectLayer, 6);
+	auto followLayer = Layer::create();
+	followLayer->setName("FollowerLayer");
+	followLayer->addChild(bgLayer, 0);
+	followLayer->addChild(mdlLayer, 1);
+	followLayer->addChild(mapLayer, 2);
+	followLayer->addChild(effectLayer, 3);
+	followLayer->addChild(playerLayer, 4);
 
-	//this->addChild(&player->GetEffect(),5);
+	followLayer->runAction(Follow::create(player, Rect(0.0f, 0.0f, map->getContentSize().width, map->getContentSize().height)));
+	this->addChild(followLayer, 0);
+
+#if CK_PLATFORM_ANDROID
+	//CkConfig config(env, activity);
+#else
+	//bank = CkBank::newBank("Resources/mymySound.ckb");
+	//sound = CkSound::newBankSound(bank,"mymy");
+	/*sound->setLoopCount(-1);
+	sound->play();*/
+#endif
 
 	this->scheduleUpdate();
-//#if CK_PLATFORM_ANDROID
-//	CkConfig config(env, activity);
-//#else
-//	CkConfig config;
-//#endif
-//
-//	CkInit(&config);
 	
-
-	CkBank* bank = CkBank::newBank("D:/hallo/MyCppGame/Resources/dsptouch.ckb", kCkPathType_FileSystem);
-	CkSound* sound = CkSound::newBankSound(bank, "my_sound");
-	sound->play();
 	return true;
 }
 
 void GameScene::update(float delta)
 {
+	/*CkUpdate();*/
 }
+
 void GameScene::menuCloseCallback(Ref* pSender)
 {
+//#if CK_PLATFORM_ANDROID
+//#else
+//	CkConfig config;
+//	sound->destroy();
+//	bank->destroy();
+//#endif
+//	
+//	CkShutdown();
     //Close the cocos2d-x game scene and quit the application
     Director::getInstance()->end();
     /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
@@ -198,7 +230,5 @@ void GameScene::menuCloseCallback(Ref* pSender)
 
 void GameScene::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & parentTransform, uint32_t parentFlags)
 {
-	//manager->begin(renderer, _globalZOrder);
 	cocos2d::Scene::visit(renderer, parentTransform, parentFlags);
-	//manager->end(renderer, _globalZOrder);
 }
