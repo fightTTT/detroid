@@ -24,7 +24,7 @@
 //#include <ck/ck.h>
 //#include <ck/config.h>
 #include "AppDelegate.h"
-#include "GameScene.h"
+#include "StartScene.h"
 #include "effect/Effekseer.h"
 
 // #define USE_AUDIO_ENGINE 1
@@ -129,9 +129,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//CkInit(&config);
 #endif
 
-    // create a scene. it's an autorelease object
-    auto scene = GameScene::createScene();
-	scene->setName("gameScene");
+    auto scene = StartScene::createScene();
+	scene->setName("StartScene");
     // run
     director->runWithScene(scene);
 	//auto scene = HelloWorld::createScene();

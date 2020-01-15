@@ -17,6 +17,7 @@ struct ActModule
 	cocos2d::Vec2 colOffsetPos;					// 当たり判定のオフセット
 	cocos2d::Vec2 colNum;						// 当たり判定の数
 	PL_ACTION actionType;						// アクションのタイプ
+	
 	std::list<actFnc> checkList;				// アクションのチェックリスト
 	actFnc actRun;								// アクションの処理
 };

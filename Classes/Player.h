@@ -17,6 +17,12 @@ enum class PL_ACTION
 	MAX
 };
 
+struct ShotData
+{
+	cocos2d::Sprite* shotSprite;
+	bool flippedFlag;
+};
+
 class ActCtrl;
 
 // アニメーションデータ　		 <plist,画像名,フレーム数 >
@@ -53,7 +59,11 @@ private:
 	// アニメーションの実行
 	void RunAnim(PL_ACTION animType);
 
+	bool Shooting();
+
 	PL_ACTION _actNow;		// 現在のアニメーション
 	PL_ACTION _actOld;		// 1フレーム前のアニメーション
-	
+
+	std::vector<ShotData> _shotObj;
+
 };

@@ -110,37 +110,37 @@ bool GameScene::init()
     // add a label shows "Hello World"
     // create and initialize a label
 
-    auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 30);
-    if (label == nullptr)
-    {
-        problemLoading("'fonts/Marker Felt.ttf'");
-    }
-    else
-    {
-        // position the label on the center of the screen
-        label->setPosition(Vec2(origin.x + visibleSize.width/2,
-                                origin.y + visibleSize.height - label->getContentSize().height));
+    //auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 30);
+    //if (label == nullptr)
+    //{
+    //    problemLoading("'fonts/Marker Felt.ttf'");
+    //}
+    //else
+    //{
+    //    // position the label on the center of the screen
+    //    label->setPosition(Vec2(origin.x + visibleSize.width/2,
+    //                            origin.y + visibleSize.height - label->getContentSize().height));
 
-        // add the label as a child to this layer
-        //this->addChild(label, 1);
-    }
+    //    // add the label as a child to this layer
+    //    //this->addChild(label, 1);
+    //}
 
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("1816019.png");
-	this->face = sprite;
-    if (sprite == nullptr)
-    {
-        problemLoading("1816019.png");
-    }
-    else
-    {
-        // position the sprite on the center of the screen
-        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y+200));
-        // add the sprite as a child to this layer
-		//sprite->setGlobalZOrder(7);
-        this->addChild(sprite, 4);
-		
-    }
+ //   auto sprite = Sprite::create("1816019.png");
+	//this->face = sprite;
+ //   if (sprite == nullptr)
+ //   {
+ //       problemLoading("1816019.png");
+ //   }
+ //   else
+ //   {
+ //       // position the sprite on the center of the screen
+ //       sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y+200));
+ //       // add the sprite as a child to this layer
+	//	//sprite->setGlobalZOrder(7);
+ //       this->addChild(sprite, 4);
+	//	
+ //   }
 
 	auto bgLayer = Layer::create();
 	auto mdlLayer = Layer::create();
@@ -173,6 +173,7 @@ bool GameScene::init()
 	subGroundLayer->setGlobalZOrder(2);*/
 	mapLayer->addChild(map);
 	/*this->addChild(mapLayer, 3);*/
+
 	auto player = Player::createSprite();
 	playerLayer->addChild(player);
 	/*this->addChild(playerLayer, 5);

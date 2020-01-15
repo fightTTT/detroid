@@ -181,25 +181,25 @@ void Player::update(float delta)
 	_input->Init(this, (Layer*)layer);
 
 	inputFlag = true;
-	lpEffectMng.Rotate("Laser", { 0.0f,90.0f,-90.0f });
+	/*lpEffectMng.Rotate("Laser", { 0.0f,90.0f,-90.0f });
 	lpEffectMng.Loop("Laser", true);
-	lpEffectMng.AddLayer("Laser", "EffectLayer", getPosition(), lpEffectMng.Rotate("Laser"));
+	lpEffectMng.AddLayer("Laser", "EffectLayer", getPosition(), lpEffectMng.Rotate("Laser"));*/
 	}
 
 	// Zキーでレーザービーム発射
-	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_Z) == INPUT_TRG::ON_MOMENT)
-	{
-		if (isFlippedX())
-		{
-			lpEffectMng.Rotate("Laser", { 0.0f,-90.0f,0.0f });
-		}
-		else
-		{
-			lpEffectMng.Rotate("Laser", { 0.0f,90.0f,0.0f });
-		}
-		
-		lpEffectMng.AddLayer("Laser", "EffectLayer", getPosition(), lpEffectMng.Rotate("Laser"));
-	}
+	//if (_input->GetInputType(EventKeyboard::KeyCode::KEY_Z) == INPUT_TRG::ON_MOMENT)
+	//{
+	//	if (isFlippedX())
+	//	{
+	//		lpEffectMng.Rotate("Laser", { 0.0f,-90.0f,0.0f });
+	//	}
+	//	else
+	//	{
+	//		lpEffectMng.Rotate("Laser", { 0.0f,90.0f,0.0f });
+	//	}
+	//	
+	//	lpEffectMng.AddLayer("Laser", "EffectLayer", getPosition(), lpEffectMng.Rotate("Laser"));
+	//}
 
 	lpEffectMng.update();
 
@@ -212,6 +212,8 @@ void Player::update(float delta)
 			player->RunAnim(player->_actNow);
 		}
 	};
+
+	Shooting();
 
 	// アクションの更新
 	_actCtrl->Update(*this);
@@ -275,5 +277,70 @@ void Player::RunAnim(PL_ACTION animType)
 		anim = Animate::create(AnimationCache::getInstance()->getAnimation("idle"));
 	}
 
+
+
 	runAction(RepeatForever::create(anim));
+}
+
+bool Player::Shooting(void)
+{
+	//// 弾の削除処理
+	//auto deth_itr = std::remove_if(_shotObj.begin(), _shotObj.end(), [](std::shared_ptr<Obj> obj) {return obj->IsDeath(); });
+	//_shotObj.erase(deth_itr, _shotObj.end());
+
+	/*if (inputState->state(INPUT_ID::BTN_1).first && !(inputState->state(INPUT_ID::BTN_1).second))
+	{
+		if (_shotObj.size() < 2)
+		{
+			_shotObj.emplace_back(std::make_shared<Shot>(_pos));
+		}
+	}*/
+
+	/*auto deth_itr = std::remove_if(_shotObj.begin(), _shotObj.end(), [](std::shared_ptr<Obj> obj) {return obj->IsDeath(); });
+	_shotObj.erase(deth_itr, _shotObj.end());*/
+
+	if (_input->GetInputType(EventKeyboard::KeyCode::KEY_Z) == INPUT_TRG::ON_MOMENT)
+	{
+		ShotData shot;
+		auto mapLayer = Director::getInstance()->getRunningScene()->getChildByName("FollowerLayer")->getChildByName("MapLayer");
+		shot.shotSprite = cocos2d::Sprite::create("image/Sprites/Fx/shot/shot-1.png");
+		shot.shotSprite->setPosition(this->getPosition());
+		shot.shotSprite->setGlobalZOrder(99);
+		mapLayer->addChild(shot.shotSprite,20);
+
+		if (isFlippedX())
+		{
+			/*if (_shotObj.size() < 2)
+			{
+				auto a = Shot::createSprite(this->getPosition(), -10);
+				_shotObj.emplace_back(a);
+			}*/
+
+			shot.flippedFlag = true;
+		}
+		else
+		{
+			/*if (_shotObj.size() < 2)
+			{
+				auto a = Shot::createSprite(this->getPosition(), -10);
+				_shotObj.emplace_back(a);
+			}*/
+			shot.flippedFlag = false;
+		}
+		_shotObj.emplace_back(shot);
+	}
+
+	for (auto &shot : _shotObj)
+	{
+		if (shot.flippedFlag)
+		{
+			shot.shotSprite->setPositionX(shot.shotSprite->getPositionX() - 10);
+		}
+		else
+		{
+			shot.shotSprite->setPositionX(shot.shotSprite->getPositionX() + 10);
+		}
+	}
+
+	return true;
 }
